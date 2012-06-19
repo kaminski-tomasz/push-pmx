@@ -1,0 +1,17 @@
+# KDE gitignore
+*~
+*.directory
+
+# Eclipse gitignore
+.settings/
+
+# Java gitignore
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# Vim specific
+*.swp
