@@ -26,14 +26,14 @@
 		<dependency>
 			<groupId>org</groupId>
 			<artifactId>ecj</artifactId>
-			<version>1.0.20</version>
+			<version>1.20.2</version>
 		</dependency>
 
 		<!-- ECJ-Psh dependency -->
 		<dependency>
 			<groupId>org</groupId>
 			<artifactId>ecj-psh</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.2</version>
 		</dependency>
 
 		<!-- Other dependecies -->
