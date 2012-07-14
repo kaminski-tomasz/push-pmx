@@ -1,7 +1,6 @@
 package org.pushpmx.problem;
 
 import org.ecj.psh.PshEvaluator;
-import org.ecj.psh.PshIndividual;
 import org.ecj.psh.PshProblem;
 import org.pushpmx.SemanticIndividual;
 import org.spiderland.Psh.Interpreter;
@@ -30,22 +29,22 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	/** How many times should input number be duplicated in float stack */
 	public int repeatFloatStack;
 
-	/** Lower range of the train set */
+	/** Lower range of the training set */
 	public float trainMinRange;
 
-	/** Upper range of the train set */
+	/** Upper range of the training set */
 	public float trainMaxRange;
 
 	/** Number of test cases used in evolution */
 	public int numOfTrainPoints;
 
-	/** Lower range of the test set */
+	/** Lower range of the testing set */
 	public float testMinRange;
 
-	/** Upper range of the test set */
+	/** Upper range of the testing set */
 	public float testMaxRange;
 
-	/** (Optional) resolution of test points */
+	/** (Optional) resolution of testing points */
 	public float testPointsResolution;
 	
 	/** Number of test cases used in testing the evolved solution */
@@ -101,7 +100,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 		}
 
 		testPointsResolution = state.parameters.getFloatWithDefault(
-				base.push(P_TESTPOINTSRES), def.push(P_TRAINMAXRANGE), 0.0f);
+				base.push(P_TESTPOINTSRES), def.push(P_TESTPOINTSRES), 0.0f);
 		
 		hitThreshold = state.parameters.getFloatWithDefault(
 				base.push(P_HITTHRESHOLD), def.push(P_HITTHRESHOLD), 0.01f);
@@ -109,16 +108,16 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 		makeInputs = state.parameters.getBoolean(base.push(P_MAKEINPUTS),
 				def.push(P_MAKEINPUTS), false);
 				
-		// Generating the train set
-		state.output.message("Train set test cases: ");
+		// Generating the training set
+		state.output.message("Training set test cases: ");
 		trainPoints = new float[numOfTrainPoints][];
 		for (int i = 0; i < numOfTrainPoints; i++) {
 			trainPoints[i] = new float[2];
-
 			trainPoints[i][0] = trainMinRange + i
 					* (trainMaxRange - trainMinRange) / (numOfTrainPoints - 1);
 			trainPoints[i][1] = evaluateFunction(trainPoints[i][0]);
-			state.output.message("[ " + trainPoints[i][0] + ", " + trainPoints[i][1] + " ]"); 
+			state.output.message("[ " + trainPoints[i][0] + ", "
+					+ trainPoints[i][1] + " ]");
 		}
 	}
 	
@@ -132,7 +131,8 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 			state.output.fatal("This is not SemanticIndividual instance!");
 		}
 		Interpreter interpreter = ((PshEvaluator) state.evaluator).interpreter[threadnum];
-		evaluateTrainSet(state, threadnum, interpreter, (SemanticIndividual) ind);
+		evaluateTrainSet(state, threadnum, interpreter,
+				(SemanticIndividual) ind);
 	}
 
 	/**
@@ -152,7 +152,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	/**
 	 * Evaluate the individual for training set points
 	 * @param interpreter
-	 * @param ind_minRandomFloat
+	 * @param ind
 	 */
 	public void evaluateTrainSet(EvolutionState state, int thread,
 			Interpreter interpreter, SemanticIndividual ind) {
@@ -166,6 +166,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 			if (error < hitThreshold) {
 				hits++;
 			}
+			errorSum += error;
 		}
 		float fitness;
 		if (Float.isInfinite(errorSum)) {
@@ -190,7 +191,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 			float input = state.random[thread].nextFloat()
 					* (testMaxRange - testMinRange);
 			if (testPointsResolution > 0.0f) {
-				input %= testPointsResolution;
+				input -= input % testPointsResolution;
 			}
 			input += testMinRange;
 			float output = evaluateFunction(input);
@@ -199,6 +200,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 			if (error < hitThreshold) {
 				hits++;
 			}
+			errorSum += error;
 		}
 		float fitness;
 		if (Float.isInfinite(errorSum)) {
