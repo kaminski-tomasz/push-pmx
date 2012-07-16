@@ -4,6 +4,8 @@ import org.ecj.psh.PshEvaluator;
 import org.ecj.psh.PshProblem;
 import org.pushpmx.SemanticIndividual;
 import org.spiderland.Psh.Interpreter;
+import org.spiderland.Psh.ObjectStack;
+import org.spiderland.Psh.SemanticInterpreter;
 
 import ec.EvolutionState;
 import ec.Individual;
@@ -13,7 +15,10 @@ import ec.util.Parameter;
 public abstract class FloatSymbolicRegression extends PshProblem {
 
 	public static final String P_REPEATFLOATSTACK = "repeat-float-stack";
-
+	
+	public static final String P_INCLUDEHITS = "include-hits";
+	public static final String P_HITSFACTOR = "hits-factor";
+	
 	public static final String P_TRAINMINRANGE = "train-min-range";
 	public static final String P_TRAINMAXRANGE = "train-max-range";
 	public static final String P_TRAINNUMPOINTS = "train-points";
@@ -25,6 +30,12 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	public static final String P_TESTPOINTSRES = "test-points-resolution";
 	public static final String P_MAKEINPUTS = "make-inputs";			
 	public static final String P_HITTHRESHOLD = "hit-threshold";
+	
+	/** Should we take into account hits while evaluating individual */
+	public boolean includeHits;
+	
+	/** Hits' coefficient multplied by hits value when evaluating */ 
+	public float hitsFactor;
 	
 	/** How many times should input number be duplicated in float stack */
 	public int repeatFloatStack;
@@ -107,7 +118,13 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 		
 		makeInputs = state.parameters.getBoolean(base.push(P_MAKEINPUTS),
 				def.push(P_MAKEINPUTS), false);
-				
+		
+		includeHits = state.parameters.getBoolean(base.push(P_INCLUDEHITS),
+				def.push(P_INCLUDEHITS), false);
+		
+		hitsFactor = state.parameters.getFloatWithDefault(
+				base.push(P_HITSFACTOR), def.push(P_HITSFACTOR), 10.f);
+		
 		// Generating the training set
 		state.output.message("Training set test cases: ");
 		trainPoints = new float[numOfTrainPoints][];
@@ -137,12 +154,16 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 
 	/**
 	 * Set the fitness and hits value for the individual
+	 * 
 	 * @param ind
 	 * @param fitness
 	 * @param hits
 	 */
-	public void setFitness(EvolutionState state, int thread, SemanticIndividual ind,
-			float fitness, int hits) {
+	public void setFitness(EvolutionState state, int thread,
+			SemanticIndividual ind, float fitness, int hits) {
+		if (includeHits) {
+			fitness += hitsFactor * (1.0f - hits / (float) numOfTrainPoints);
+		}
 		KozaFitness f = (KozaFitness) ind.fitness;
 		f.setStandardizedFitness(state, fitness);
 		f.hits = hits;
@@ -151,6 +172,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	
 	/**
 	 * Evaluate the individual for training set points
+	 * 
 	 * @param interpreter
 	 * @param ind
 	 */
@@ -249,6 +271,6 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	 * @param x argument of the function
 	 * @return value for given argument
 	 */
-	abstract float evaluateFunction(float x);
+	protected abstract float evaluateFunction(float x);
 
 }
