@@ -4,8 +4,6 @@ import org.ecj.psh.PshEvaluator;
 import org.ecj.psh.PshProblem;
 import org.pushpmx.SemanticIndividual;
 import org.spiderland.Psh.Interpreter;
-import org.spiderland.Psh.ObjectStack;
-import org.spiderland.Psh.SemanticInterpreter;
 
 import ec.EvolutionState;
 import ec.Individual;

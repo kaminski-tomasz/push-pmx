@@ -1,0 +1,168 @@
+
+####### threads & checkpointing
+
+evalthreads			= 1
+breedthreads 		= 1
+seed.0 				= time
+
+checkpoint 			= false
+checkpoint-modulo	= 1
+prefix				= psh
+
+
+####### "simple" settings
+
+breed					= ec.simple.SimpleBreeder
+state					= ec.simple.SimpleEvolutionState
+init					= ec.simple.SimpleInitializer
+finish					= ec.simple.SimpleFinisher
+exch					= ec.simple.SimpleExchanger
+
+generations				= 250
+quit-on-run-complete	= true
+
+
+####### Population settings
+
+pop								= ec.Population
+pop.subpops						= 1
+pop.subpop.0					= ec.Subpopulation
+pop.subpop.0.size				= 1000
+pop.subpop.0.duplicate-retries	= 0
+
+
+###### Statistics
+
+stat				= ec.simple.SimpleStatistics
+stat.file			= $out/out.stat
+stat.num-children	= 1
+
+stat.child.0		= org.pushpmx.PshShortStatistics
+stat.child.0.gather-full = true
+stat.child.0.file	= $out/out-short.stat
+
+
+####### PushGP specific settings
+
+eval						= org.ecj.psh.PshEvaluator
+eval.interpreter			= org.spiderland.Psh.SemanticInterpreter
+
+psh.ideal-threshold			= 1.0E-6
+
+pop.subpop.0.species		= org.ecj.psh.PshSpecies
+pop.subpop.0.species.ind	= org.pushpmx.SemanticIndividual
+
+# in GP we usually use Koza fitness
+pop.subpop.0.species.fitness	= ec.gp.koza.KozaFitness
+
+
+############ Default Interpreter settings
+
+psh.interpreter.traced-stack			= null
+
+psh.interpreter.generate-flat			= false
+
+psh.interpreter.max-random-code-size	= 30
+psh.interpreter.execution-limit			= 100
+psh.interpreter.max-points-in-program	= 100
+
+psh.interpreter.push-frame-mode			= false
+
+psh.interpreter.max-random-float		= 10.0
+psh.interpreter.min-random-float		= -10.0
+psh.interpreter.random-float-res		= 0.01
+
+psh.interpreter.instruction-list		= instructions.txt
+
+####### Specifying the problem
+eval.problem 							= org.pushpmx.problem.Keijzer4Problem
+
+eval.problem.repeat-float-stack 		= 10
+eval.problem.make-inputs 				= false
+
+eval.problem.include-hits	 			= false
+#eval.problem.hits-factor				= 10.0
+
+
+####### Specifying default breeding pipelines parametersMutationPipeline
+ 
+# Tournament selection settings
+select.tournament.size					= 7
+
+# Reproduction pipeline settings
+breed.reproduce.source.0 				= ec.select.TournamentSelection
+ 
+# Mutation pipeline settings
+psh.breed.psh-mutate.source.0				= ec.select.TournamentSelection
+psh.breed.psh-mutate.use-fair				= true
+psh.breed.psh-mutate.fair-mutation-range	= 0.30
+
+# Simplification pipeline settings
+psh.breed.psh-simplify.source.0				= ec.select.TournamentSelection
+psh.breed.psh-simplify.steps				= 1
+psh.breed.psh-simplify.flatten-prob			= 0.00
+
+# Psh crossover pipeline settings
+psh.breed.psh-xover.source.0			= ec.select.TournamentSelection
+psh.breed.psh-xover.source.1			= same
+psh.breed.psh-xover.toss				= true
+
+# One-point crossover pipeline settings
+psh.breed.one-point-xover.source.0			= ec.select.TournamentSelection
+psh.breed.one-point-xover.source.1			= same
+psh.breed.one-point-xover.toss				= false
+psh.breed.one-point-xover.homologous		= false
+psh.breed.two-point-xover.tries				= 0
+
+# Two-point crossover pipeline settings
+psh.breed.two-point-xover.source.0			= ec.select.TournamentSelection
+psh.breed.two-point-xover.source.1			= same
+psh.breed.two-point-xover.toss				= true
+psh.breed.two-point-xover.homologous		= false
+psh.breed.two-point-xover.tries				= 0
+
+####### Specifying PushGP breeding pipelines 
+
+#pop.subpop.0.species.pipe = org.ecj.psh.breed.OnePointCrossover
+#pop.subpop.0.species.pipe.likelihood = 1.0
+
+
+
+pop.subpop.0.species.pipe					= ec.breed.MultiBreedingPipeline
+pop.subpop.0.species.pipe.num-sources 		= 4
+pop.subpop.0.species.pipe.generate-max		= true
+
+pop.subpop.0.species.pipe.source.0			= org.ecj.psh.breed.TwoPointCrossover
+pop.subpop.0.species.pipe.source.0.prob		= 0.70
+
+pop.subpop.0.species.pipe.source.1			= org.ecj.psh.breed.PshMutation
+pop.subpop.0.species.pipe.source.1.prob		= 0.20
+
+pop.subpop.0.species.pipe.source.2			= org.ecj.psh.breed.PshSimplification
+pop.subpop.0.species.pipe.source.2.prob		= 0.05
+
+pop.subpop.0.species.pipe.source.3			= ec.breed.ReproductionPipeline
+pop.subpop.0.species.pipe.source.3.prob		= 0.05
+
+
+
+#pop.subpop.0.species.pipe	= org.pushpmx.breed.FlatteningMutation
+#pop.subpop.0.species.pipe.likelihood = 0.0
+#
+#pop.subpop.0.species.pipe.source.0					= ec.breed.MultiBreedingPipeline
+#pop.subpop.0.species.pipe.source.0.num-sources 		= 4
+#pop.subpop.0.species.pipe.source.0.generate-max		= true
+#
+#pop.subpop.0.species.pipe.source.0.source.0			= org.ecj.psh.breed.TwoPointCrossover
+#pop.subpop.0.species.pipe.source.0.source.0.prob		= 0.70
+#
+#pop.subpop.0.species.pipe.source.0.source.1			= org.ecj.psh.breed.PshMutation
+#pop.subpop.0.species.pipe.source.0.source.1.prob		= 0.20
+#
+#pop.subpop.0.species.pipe.source.0.source.2			= org.ecj.psh.breed.PshSimplification
+#pop.subpop.0.species.pipe.source.0.source.2.prob		= 0.05
+#
+#pop.subpop.0.species.pipe.source.0.source.3			= ec.breed.ReproductionPipeline
+#pop.subpop.0.species.pipe.source.0.source.3.prob		= 0.05
+
+

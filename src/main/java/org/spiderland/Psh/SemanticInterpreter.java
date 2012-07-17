@@ -1,5 +1,7 @@
 package org.spiderland.Psh;
 
+import java.util.ArrayList;
+
 import ec.EvolutionState;
 import ec.util.Parameter;
 
@@ -14,6 +16,8 @@ public class SemanticInterpreter extends Interpreter {
 
 	public static final String P_TRACEDSTACK = "traced-stack";
 	
+	public ArrayList<String> instructionNames = new ArrayList<String>(30);
+	
 	/**
 	 * The stack to be traced. By default, none of the stacks is traced
 	 */
@@ -27,7 +31,7 @@ public class SemanticInterpreter extends Interpreter {
 	}
 
 	/**
-	 * Stack history traced after each done step
+	 * Stack history traced after each step
 	 */
 	public ObjectStack _trace = new ObjectStack();
 
@@ -50,6 +54,19 @@ public class SemanticInterpreter extends Interpreter {
 			_stackToBeTraced = null;
 
 	}
+		
+	@Override
+	public void SetInstructions(Program inInstructionList)
+			throws RuntimeException {
+		super.SetInstructions(inInstructionList);
+		for (Object instr : _generators.keySet().toArray()) {
+			String in = (String) instr;
+			if (_randomGenerators.contains(_generators
+					.get(in)) && !in.contains(".erc"))
+				instructionNames.add(in);
+		}
+	}
+	
 	/**
 	 * Executes a Push program with a given instruction limit.
 	 * 
@@ -60,7 +77,8 @@ public class SemanticInterpreter extends Interpreter {
 	 */
 	@Override
 	public int Execute(Program inProgram, int inMaxSteps) {
-
+		return super.Execute(inProgram, inMaxSteps);
+		/*
 		_evaluationExecutions++;
 		_codeStack.push(inProgram);
 
@@ -90,11 +108,56 @@ public class SemanticInterpreter extends Interpreter {
 		}
 
 		return totalSteps;
+		*/
 	}
 
 	@Override
 	public void ClearStacks() {
 		super.ClearStacks();
 		_trace.clear();
+	}
+	
+//	public void RestoreStacks() {
+//		_floatFrameStack.pop();
+//		_intFrameStack.pop();
+//		_boolFrameStack.pop();
+//		_codeFrameStack.pop();
+//		_nameFrameStack.pop();
+//		
+//		_floatFrameStack.push(((floatStack)_floatFrameStack.top()).clone());
+//		_intFrameStack.push(((intStack)_intFrameStack.top()).clone());
+//		_boolFrameStack.push(((booleanStack)_boolFrameStack.top()).clone());
+//		_codeFrameStack.push(((ObjectStack)_codeFrameStack.top()).clone());
+//		_nameFrameStack.push(((ObjectStack)_nameFrameStack.top()).clone());
+//		
+//		AssignStacksFromFrame();
+//	}
+	
+	public class InterpreterState {
+		protected intStack _intStack = null;
+		protected floatStack _floatStack = null;
+		protected booleanStack _boolStack = null;
+		
+		/** Saves the interpreter's value stacks */
+		public void save() {
+			this._intStack = SemanticInterpreter.this._intStack.clone();
+			this._floatStack = SemanticInterpreter.this._floatStack.clone();
+			this._boolStack = SemanticInterpreter.this._boolStack.clone();
+		}
+		
+		/**
+		 * Restores value stacks. WARNING: this is not compatible with
+		 * push frame mode (because the new stacks are not in frame stacks) - I
+		 * don't need this functionality for now
+		 */
+		public void restore() {
+			SemanticInterpreter.this._intStack = _intStack.clone();
+			SemanticInterpreter.this._floatStack = _floatStack.clone();
+			SemanticInterpreter.this._boolStack = _boolStack.clone();
+			
+			UpdateStackInstructions(StackType.FLOAT_STACK);
+			UpdateStackInstructions(StackType.INT_STACK);
+			UpdateStackInstructions(StackType.BOOL_STACK);
+		}
 	}
 }
