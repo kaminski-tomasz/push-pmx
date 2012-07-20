@@ -52,7 +52,7 @@ stat.child.0.file	= $out/out-short.stat
 
 psh.interpreter							= org.spiderland.Psh.SemanticInterpreter
 
-psh.interpreter.generate-flat			= true
+psh.interpreter.generate-flat			= false
 
 psh.interpreter.max-random-code-size	= 30
 psh.interpreter.execution-limit			= 100
@@ -68,7 +68,7 @@ psh.interpreter.instruction-list		= instructions.txt
 
 ####### Specifying the problem
 eval.problem 							= org.pushpmx.problem.QuarticProblem
-eval.problem.train-points 				= 30
+eval.problem.train-points 				= 20
 eval.problem.repeat-float-stack 		= 10
 eval.problem.make-inputs 				= true
 
@@ -119,10 +119,11 @@ psh.breed.pmx-xover.source.1				= same
 psh.breed.pmx-xover.toss					= true
 psh.breed.pmx-xover.homologous				= false
 
-psh.breed.pmx-xover.metric					= org.pushpmx.metric.EuclideanMetric
+psh.breed.pmx-xover.metric					= org.pushpmx.metric.DiscordanceMetric
+psh.breed.pmx-xover.metric.compare-tails	= true
 psh.breed.pmx-xover.subprogram-length		= 1
-psh.breed.pmx-xover.searching-steps			= 100
-psh.breed.pmx-xover.greedy					= true
+psh.breed.pmx-xover.searching-steps			= 10
+psh.breed.pmx-xover.greedy-search			= true
 psh.breed.pmx-xover.shuffle					= true
 
 ####### Specifying PushGP breeding pipelines 
@@ -132,13 +133,14 @@ psh.breed.pmx-xover.shuffle					= true
 
 
 pop.subpop.0.species.pipe					= ec.breed.MultiBreedingPipeline
-pop.subpop.0.species.pipe.num-sources 		= 1
+pop.subpop.0.species.pipe.num-sources 		= 4
 pop.subpop.0.species.pipe.generate-max		= true
 
-pop.subpop.0.species.pipe.source.0			= org.pushpmx.breed.PmxCrossover
+pop.subpop.0.species.pipe.source.0			= org.pushpmx.breed.SemanticCrossover
 #pop.subpop.0.species.pipe.source.0			= org.ecj.psh.breed.TwoPointCrossover
 #pop.subpop.0.species.pipe.source.0			= org.ecj.psh.breed.PshMutation
-pop.subpop.0.species.pipe.source.0.prob		= 1.00
+#pop.subpop.0.species.pipe.source.0			= org.ecj.psh.breed.PshCrossover
+pop.subpop.0.species.pipe.source.0.prob		= 0.70
 
 
 pop.subpop.0.species.pipe.source.1			= org.ecj.psh.breed.PshMutation

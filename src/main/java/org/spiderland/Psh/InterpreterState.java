@@ -7,6 +7,20 @@ public class InterpreterState implements Cloneable {
 	private ObjectStack codeStack = null;
 	private ObjectStack nameStack = null;
 	private ObjectStack inputStack = null;
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		InterpreterState state = (InterpreterState) obj;
+		boolean result = true;
+		result &= state.floatStack.equals(floatStack);
+		result &= state.boolStack.equals(boolStack);
+		result &= state.intStack.equals(intStack);
+		result &= state.inputStack.equals(inputStack);
+		result &= state.nameStack.equals(nameStack);
+		result &= state.codeStack.equals(codeStack);
+		return result;
+	}
 
 	public InterpreterState() {
 		this.intStack = new intStack();
@@ -53,7 +67,8 @@ public class InterpreterState implements Cloneable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder("\n");
 		sb.append("{F: ").append(floatStack).append(", IN: ")
-				.append(inputStack).append("}");
+				.append(inputStack).append("}").append(", B: ")
+				.append(boolStack).append(", INT: ").append(intStack);
 		return sb.toString();
 	}
 	

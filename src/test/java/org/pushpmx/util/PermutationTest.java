@@ -57,8 +57,15 @@ public class PermutationTest {
 	@Test
 	public void test_shuffle_0() {
 		Permutation perm = new Permutation(5);
+		stateRandom[0].setSeed(1234);
 		perm.shuffle(state, 0, 0);
-		assertArrayEquals(new int[]{0,1,2,3,4}, perm.perm);	
+		
+
+		Permutation perm2 = new Permutation(5);
+		stateRandom[0].setSeed(1234);
+		perm2.shuffle(state, 0, 5);
+		
+		assertArrayEquals(perm2.perm, perm.perm);	
 	}
 
 	@Test

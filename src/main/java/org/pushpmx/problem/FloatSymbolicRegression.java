@@ -69,7 +69,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	public boolean makeInputs;
 	
 	/** Points generated to be the training set of test-cases */
-	private float[][] trainPoints = null;
+	public float[][] trainPoints = null;
 
 	@Override
 	public void setup(final EvolutionState state, final Parameter base) {
@@ -272,7 +272,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	 * 
 	 * @return array of interpreter states
 	 */
-	public InterpreterState[] initInterpreterStates() {
+	public InterpreterState[] initInterpreterStateArray() {
 		InterpreterState[] states = new InterpreterState[numOfTrainPoints];
 		for (int i = 0; i < numOfTrainPoints; i++) {
 			states[i] = new InterpreterState();
@@ -301,16 +301,17 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	 * @param program
 	 * @return
 	 */
-	public InterpreterState[] computeInterpreterStates(
+	public InterpreterState[] computeInterpreterStateArray(
 			InterpreterState[] initStates, SemanticInterpreter interpreter,
 			Program program) {
 		if (initStates.length != numOfTrainPoints)
 			throw new InternalError();
 		InterpreterState[] states = new InterpreterState[numOfTrainPoints];
 		for (int i = 0; i < numOfTrainPoints; i++) {
-			interpreter.setState(initStates[i].clone());
+			InterpreterState state = initStates[i].clone();
+			interpreter.setMemoryState(state);
 			interpreter.Execute(program);
-			states[i] = interpreter.getState().clone();
+			states[i] = interpreter.getMemoryState().clone();
 		}
 		return states;
 	}

@@ -22,7 +22,7 @@ public class HammingMetric extends SemanticsMetric {
 		if (stack1.length != stack2.length)
 			return 1.0f;
 		for (int i = 0; i < stack1.length; i++) {
-			if (stack1[i] != stack2[i])
+			if (Math.abs(stack1[i] - stack2[i]) > epsilon)
 				return 1.0f;
 		}
 		return 0.0f;

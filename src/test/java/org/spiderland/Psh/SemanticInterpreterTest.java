@@ -80,4 +80,26 @@ public class SemanticInterpreterTest {
 		assertEquals(size*size*size, programs.size());
 	}
 
+	@Test
+	public void test_get_memory_state(){
+		InterpreterState state = interpreter.getMemoryState();
+		assertSame(interpreter.intStack(), state.getIntStack());
+		assertSame(interpreter.boolStack(), state.getBoolStack());
+		assertSame(interpreter.floatStack(), state.getFloatStack());
+		assertSame(interpreter.inputStack(), state.getInputStack());
+		assertSame(interpreter.nameStack(), state.getNameStack());
+		assertSame(interpreter.codeStack(), state.getCodeStack());
+	}
+	
+	@Test
+	public void test_set_memory_state(){
+		InterpreterState state = new InterpreterState(); 
+		interpreter.setMemoryState(state);
+		assertSame(interpreter.intStack(), state.getIntStack());
+		assertSame(interpreter.boolStack(), state.getBoolStack());
+		assertSame(interpreter.floatStack(), state.getFloatStack());
+		assertSame(interpreter.inputStack(), state.getInputStack());
+		assertSame(interpreter.nameStack(), state.getNameStack());
+		assertSame(interpreter.codeStack(), state.getCodeStack());
+	}
 }

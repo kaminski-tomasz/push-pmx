@@ -1,9 +1,21 @@
 package org.pushpmx;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.spiderland.Psh.Interpreter.StackType;
+import org.spiderland.Psh.InterpreterState;
 import org.spiderland.Psh.booleanStack;
 import org.spiderland.Psh.floatStack;
 import org.spiderland.Psh.intStack;
@@ -13,8 +25,144 @@ public class SemanticsTest {
 	protected Semantics semantics;
 	
 	@Before
-	public void prepare() {
+	public void prepare() throws Exception {
 		semantics = new Semantics();
+	}
+
+	@Test
+	public void test_contruct_from_interpreter_state_boolean_stack() {
+		InterpreterState[] state = new InterpreterState[3];
+		state[0] = mock(InterpreterState.class);
+		when(state[0].getBoolStack()).then(new Answer<booleanStack>() {
+			public booleanStack answer(InvocationOnMock invocation)
+					throws Throwable {
+				booleanStack boolStack = new booleanStack();
+				boolStack.push(true);
+				boolStack.push(false);
+				boolStack.push(true);
+				boolStack.push(true);
+				return boolStack;
+			}
+		});
+		state[1] = mock(InterpreterState.class);
+		when(state[1].getBoolStack()).then(new Answer<booleanStack>() {
+			public booleanStack answer(InvocationOnMock invocation)
+					throws Throwable {
+				booleanStack boolStack = new booleanStack();
+				boolStack.push(false);
+				boolStack.push(false);
+				boolStack.push(true);
+				boolStack.push(false);
+				return boolStack;
+			}
+		});
+		state[2] = mock(InterpreterState.class);
+		when(state[2].getBoolStack()).then(new Answer<booleanStack>() {
+			public booleanStack answer(InvocationOnMock invocation)
+					throws Throwable {
+				booleanStack boolStack = new booleanStack();
+				boolStack.push(false);
+				boolStack.push(true);
+				boolStack.push(true);
+				boolStack.push(false);
+				return boolStack;
+			}
+		});
+		
+		Semantics semantics = new Semantics(state, StackType.BOOL_STACK);
+		ArrayList<float[]> expected = new ArrayList<float[]>(3);
+		expected.add(new float[]{1, 0, 1, 1});
+		expected.add(new float[]{0, 0, 1, 0});
+		expected.add(new float[]{0, 1, 1, 0});
+		assertArrayEquals(expected.toArray(), semantics.stackVector.toArray());
+		for (int i = 0; i < 3; i++) {
+			verify(state[i], times(1)).getBoolStack();
+			verify(state[i], times(0)).getFloatStack();
+			verify(state[i], times(0)).getIntStack();
+			verify(state[i], times(0)).getCodeStack();
+			verify(state[i], times(0)).getNameStack();
+			verify(state[i], times(0)).getInputStack();
+		}		
+	}
+	
+	@Test
+	public void test_contruct_from_interpreter_state_float_stack() {
+		InterpreterState[] state = new InterpreterState[2];
+		state[0] = mock(InterpreterState.class);
+		when(state[0].getFloatStack()).then(new Answer<floatStack>() {
+			public floatStack answer(InvocationOnMock invocation)
+					throws Throwable {
+				floatStack stack = new floatStack();
+				stack.push(1);
+				stack.push(2);
+				stack.push(3);
+				return stack;
+			}
+		});
+		state[1] = mock(InterpreterState.class);
+		when(state[1].getFloatStack()).then(new Answer<floatStack>() {
+			public floatStack answer(InvocationOnMock invocation)
+					throws Throwable {
+				floatStack stack = new floatStack();
+				stack.push(3.2f);
+				stack.push(3.33f);
+				return stack;
+			}
+		});
+		
+		Semantics semantics = new Semantics(state);
+		ArrayList<float[]> expected = new ArrayList<float[]>(2);
+		expected.add(new float[]{1.0f, 2.0f, 3.0f});
+		expected.add(new float[]{3.2f, 3.33f});
+		assertArrayEquals(expected.toArray(), semantics.stackVector.toArray());
+		for (int i = 0; i < 2; i++) {
+			verify(state[i], times(0)).getBoolStack();
+			verify(state[i], times(1)).getFloatStack();
+			verify(state[i], times(0)).getIntStack();
+			verify(state[i], times(0)).getCodeStack();
+			verify(state[i], times(0)).getNameStack();
+			verify(state[i], times(0)).getInputStack();
+		}		
+	}
+	
+	@Test
+	public void test_contruct_from_interpreter_state_int_stack() {
+		InterpreterState[] state = new InterpreterState[2];
+		state[0] = mock(InterpreterState.class);
+		when(state[0].getIntStack()).then(new Answer<intStack>() {
+			public intStack answer(InvocationOnMock invocation)
+					throws Throwable {
+				intStack stack = new intStack();
+				stack.push(1);
+				stack.push(2);
+				stack.push(3);
+				return stack;
+			}
+		});
+		state[1] = mock(InterpreterState.class);
+		when(state[1].getIntStack()).then(new Answer<intStack>() {
+			public intStack answer(InvocationOnMock invocation)
+					throws Throwable {
+				intStack stack = new intStack();
+				stack.push(3);
+				stack.push(1);
+				return stack;
+			}
+		});
+		
+		Semantics semantics = new Semantics(state, StackType.INT_STACK);
+		ArrayList<float[]> expected = new ArrayList<float[]>(2);
+		expected.add(new float[]{1.0f, 2.0f, 3.0f});
+		expected.add(new float[]{3.0f, 1.0f});
+		assertArrayEquals(expected.toArray(), semantics.stackVector.toArray());
+		for (int i = 0; i < 2; i++) {
+			verify(state[i], times(0)).getBoolStack();
+			verify(state[i], times(0)).getFloatStack();
+			verify(state[i], times(1)).getIntStack();
+			verify(state[i], times(0)).getCodeStack();
+			verify(state[i], times(0)).getNameStack();
+			verify(state[i], times(0)).getInputStack();
+		}		
 	}
 	
 	@Test
