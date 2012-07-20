@@ -1,6 +1,17 @@
 package org.pushpmx.metric;
 
+import org.ecj.psh.PshDefaults;
+
+import ec.util.Parameter;
+
 public class HammingMetric extends SemanticsMetric {
+
+	public static final String P_METRIC = "hamming-metric";
+
+	@Override
+	public Parameter defaultBase() {
+		return PshDefaults.base().push(P_METRIC);
+	}
 
 	@Override
 	protected float getStackDistance(float[] stack1, float[] stack2) {

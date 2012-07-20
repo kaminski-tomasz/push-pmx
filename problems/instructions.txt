@@ -16,3 +16,4 @@ float.stackdepth
 float.swap
 float.yank
 float.yankdup
+input.makeinputs1

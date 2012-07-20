@@ -1,5 +1,5 @@
 
-####### threads & checkpointing
+####### EvolutionState settings
 
 evalthreads			= 1
 breedthreads 		= 1
@@ -9,14 +9,13 @@ checkpoint 			= false
 checkpoint-modulo	= 1
 prefix				= psh
 
-
-####### "simple" settings
-
 breed					= ec.simple.SimpleBreeder
-state					= ec.simple.SimpleEvolutionState
 init					= ec.simple.SimpleInitializer
 finish					= ec.simple.SimpleFinisher
 exch					= ec.simple.SimpleExchanger
+
+state					= org.ecj.psh.PshEvolutionState
+eval					= org.ecj.psh.PshEvaluator
 
 generations				= 1000
 quit-on-run-complete	= true
@@ -30,6 +29,12 @@ pop.subpop.0					= ec.Subpopulation
 pop.subpop.0.size				= 200
 pop.subpop.0.duplicate-retries	= 0
 
+pop.subpop.0.species			= org.ecj.psh.PshSpecies
+pop.subpop.0.species.ind		= org.pushpmx.SemanticIndividual
+
+# in GP we usually use Koza fitness
+pop.subpop.0.species.fitness	= ec.gp.koza.KozaFitness
+
 
 ###### Statistics
 
@@ -41,18 +46,9 @@ stat.child.0		= ec.simple.SimpleShortStatistics
 stat.child.0.file	= $out-short.stat
 
 
-####### PushGP specific settings
-
-eval						= org.ecj.psh.PshEvaluator
-eval.interpreter			= org.spiderland.Psh.SemanticInterpreter
-pop.subpop.0.species		= org.ecj.psh.PshSpecies
-pop.subpop.0.species.ind	= org.pushpmx.SemanticIndividual
-
-# in GP we usually use Koza fitness
-pop.subpop.0.species.fitness	= ec.gp.koza.KozaFitness
-
-
 ############ Default Interpreter settings
+
+psh.interpreter							= org.spiderland.Psh.SemanticInterpreter
 
 psh.interpreter.generate-flat			= false
 

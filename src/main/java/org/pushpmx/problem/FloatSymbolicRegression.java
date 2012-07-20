@@ -1,9 +1,12 @@
 package org.pushpmx.problem;
 
-import org.ecj.psh.PshEvaluator;
+import org.ecj.psh.PshEvolutionState;
 import org.ecj.psh.PshProblem;
 import org.pushpmx.SemanticIndividual;
 import org.spiderland.Psh.Interpreter;
+import org.spiderland.Psh.InterpreterState;
+import org.spiderland.Psh.Program;
+import org.spiderland.Psh.SemanticInterpreter;
 
 import ec.EvolutionState;
 import ec.Individual;
@@ -67,7 +70,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	
 	/** Points generated to be the training set of test-cases */
 	private float[][] trainPoints = null;
-	
+
 	@Override
 	public void setup(final EvolutionState state, final Parameter base) {
 		super.setup(state, base);
@@ -145,7 +148,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 		if (!(ind instanceof SemanticIndividual)) {
 			state.output.fatal("This is not SemanticIndividual instance!");
 		}
-		Interpreter interpreter = ((PshEvaluator) state.evaluator).interpreter[threadnum];
+		Interpreter interpreter = ((PshEvolutionState) state).interpreter[threadnum];
 		evaluateTrainSet(state, threadnum, interpreter,
 				(SemanticIndividual) ind);
 	}
@@ -262,6 +265,54 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 		// compute result as absolute difference
 		float error = Math.abs(interpreter.floatStack().top() - output);
 		return error;
+	}
+	
+	/**
+	 * Create initial interpreter memory state for each test case
+	 * 
+	 * @return array of interpreter states
+	 */
+	public InterpreterState[] initInterpreterStates() {
+		InterpreterState[] states = new InterpreterState[numOfTrainPoints];
+		for (int i = 0; i < numOfTrainPoints; i++) {
+			states[i] = new InterpreterState();
+			// get training point
+			float input = trainPoints[i][0];
+			// pushing input value to the float stack number of times (typically
+			// once)
+			for (int k = 0; k < repeatFloatStack; k++) {
+				states[i].getFloatStack().push(input);
+			}
+			if (makeInputs) {
+				// setting input value to input stack
+				states[i].getInputStack().push((Float) input);
+			}
+		}
+		return states;
+	}
+
+	/**
+	 * Compute interpreter memory state having given initial state for each test
+	 * case
+	 * 
+	 * @param initStates
+	 *            array of initial states for each test case
+	 * @param interpreter
+	 * @param program
+	 * @return
+	 */
+	public InterpreterState[] computeInterpreterStates(
+			InterpreterState[] initStates, SemanticInterpreter interpreter,
+			Program program) {
+		if (initStates.length != numOfTrainPoints)
+			throw new InternalError();
+		InterpreterState[] states = new InterpreterState[numOfTrainPoints];
+		for (int i = 0; i < numOfTrainPoints; i++) {
+			interpreter.setState(initStates[i].clone());
+			interpreter.Execute(program);
+			states[i] = interpreter.getState().clone();
+		}
+		return states;
 	}
 	
 	/**

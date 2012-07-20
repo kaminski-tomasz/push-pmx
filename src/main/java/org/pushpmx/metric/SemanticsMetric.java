@@ -2,7 +2,25 @@ package org.pushpmx.metric;
 
 import org.pushpmx.Semantics;
 
-public abstract class SemanticsMetric {
+import ec.EvolutionState;
+import ec.Prototype;
+import ec.util.Parameter;
+
+public abstract class SemanticsMetric implements Prototype {
+
+	@Override
+	public SemanticsMetric clone() {
+		try {
+			SemanticsMetric metric = (SemanticsMetric) super.clone();
+			return metric;
+		} catch (CloneNotSupportedException e) {
+			throw new InternalError();
+		}
+	}
+
+	@Override
+	public void setup(EvolutionState state, Parameter base) {
+	}
 
 	public float getDistance(Semantics sem1, Semantics sem2) {
 		int size = sem1.stackVector.size();
