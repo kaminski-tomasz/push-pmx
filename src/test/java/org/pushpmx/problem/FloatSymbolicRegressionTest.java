@@ -51,7 +51,7 @@ public class FloatSymbolicRegressionTest {
 		// creating problem
 		problem = new FloatSymbolicRegression() {
 			@Override
-			protected float evaluateFunction(float x) {
+			protected double evaluateFunction(double x) {
 				return x;
 			}
 		};
@@ -60,7 +60,7 @@ public class FloatSymbolicRegressionTest {
 	
 	@Test
 	public void test_training_points() {
-		float[][] expected = { { -1, -1 }, { 0, 0 }, { 1, 1 } };
+		double[][] expected = { { -1, -1 }, { 0, 0 }, { 1, 1 } };
 		assertArrayEquals(expected, problem.trainPoints);
 	}
 	

@@ -1,8 +1,8 @@
 package org.pushpmx.problem;
 
 import org.ecj.psh.PshEvolutionState;
+import org.ecj.psh.PshIndividual;
 import org.ecj.psh.PshProblem;
-import org.pushpmx.SemanticIndividual;
 import org.spiderland.Psh.Interpreter;
 import org.spiderland.Psh.InterpreterState;
 import org.spiderland.Psh.Program;
@@ -16,7 +16,8 @@ import ec.util.Parameter;
 public abstract class FloatSymbolicRegression extends PshProblem {
 
 	public static final String P_REPEATFLOATSTACK = "repeat-float-stack";
-	
+
+	public static final String P_PENALIZE = "penalize";
 	public static final String P_INCLUDEHITS = "include-hits";
 	public static final String P_HITSFACTOR = "hits-factor";
 	
@@ -34,6 +35,9 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	
 	/** Should we take into account hits while evaluating individual */
 	public boolean includeHits;
+	
+	/** Should penalize individual when float stack is empty */
+	public boolean penalizeIndividuals;
 	
 	/** Hits' coefficient multplied by hits value when evaluating */ 
 	public float hitsFactor;
@@ -69,7 +73,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	public boolean makeInputs;
 	
 	/** Points generated to be the training set of test-cases */
-	public float[][] trainPoints = null;
+	public double[][] trainPoints = null;
 
 	@Override
 	public void setup(final EvolutionState state, final Parameter base) {
@@ -120,6 +124,9 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 		makeInputs = state.parameters.getBoolean(base.push(P_MAKEINPUTS),
 				def.push(P_MAKEINPUTS), false);
 		
+		penalizeIndividuals = state.parameters.getBoolean(base.push(P_PENALIZE),
+				def.push(P_PENALIZE), true);
+		
 		includeHits = state.parameters.getBoolean(base.push(P_INCLUDEHITS),
 				def.push(P_INCLUDEHITS), false);
 		
@@ -128,9 +135,9 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 		
 		// Generating the training set
 		state.output.message("Training set test cases: ");
-		trainPoints = new float[numOfTrainPoints][];
+		trainPoints = new double[numOfTrainPoints][];
 		for (int i = 0; i < numOfTrainPoints; i++) {
-			trainPoints[i] = new float[2];
+			trainPoints[i] = new double[2];
 			trainPoints[i][0] = trainMinRange + i
 					* (trainMaxRange - trainMinRange) / (numOfTrainPoints - 1);
 			trainPoints[i][1] = evaluateFunction(trainPoints[i][0]);
@@ -145,12 +152,12 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 		if (ind.evaluated)
 			return;
 
-		if (!(ind instanceof SemanticIndividual)) {
-			state.output.fatal("This is not SemanticIndividual instance!");
+		if (!(ind instanceof PshIndividual)) {
+			state.output.fatal("This is not PshIndividual instance!");
 		}
 		Interpreter interpreter = ((PshEvolutionState) state).interpreter[threadnum];
 		evaluateTrainSet(state, threadnum, interpreter,
-				(SemanticIndividual) ind);
+				(PshIndividual) ind);
 	}
 
 	/**
@@ -161,7 +168,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	 * @param hits
 	 */
 	public void setFitness(EvolutionState state, int thread,
-			SemanticIndividual ind, float fitness, int hits) {
+			PshIndividual ind, float fitness, int hits) {
 		if (includeHits) {
 			fitness += hitsFactor * (1.0f - hits / (float) numOfTrainPoints);
 		}
@@ -178,13 +185,13 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	 * @param ind
 	 */
 	public void evaluateTrainSet(EvolutionState state, int thread,
-			Interpreter interpreter, SemanticIndividual ind) {
-		float errorSum = 0.0f;
+			Interpreter interpreter, PshIndividual ind) {
+		double errorSum = 0.0;
 		int hits = 0;
 		for (int i = 0; i < numOfTrainPoints; i++) {
-			float input = trainPoints[i][0];
-			float output = trainPoints[i][1];
-			float error = evaluateSingleTestCase(interpreter, ind, i, input,
+			double input = trainPoints[i][0];
+			double output = trainPoints[i][1];
+			double error = evaluateSingleTestCase(interpreter, ind, i, input,
 					output);
 			if (error < hitThreshold) {
 				hits++;
@@ -192,10 +199,10 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 			errorSum += error;
 		}
 		float fitness;
-		if (Float.isInfinite(errorSum)) {
+		if (Double.isInfinite(errorSum)) {
 			fitness = Float.MAX_VALUE;
 		} else {
-			fitness = errorSum / numOfTrainPoints;
+			fitness = (float)(errorSum / numOfTrainPoints);
 		}
 		setFitness(state, thread, ind, fitness, hits);
 	}
@@ -206,19 +213,19 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	 * @param ind
 	 */
 	public void evaluateTestSet(EvolutionState state, int thread,
-			Interpreter interpreter, SemanticIndividual ind) {
-		float errorSum = 0.0f;
+			Interpreter interpreter, PshIndividual ind) {
+		double errorSum = 0.0;
 		int hits = 0;
 		for (int i = 0; i < numOfTestPoints; i++) {
 			// generate random point in given range
-			float input = state.random[thread].nextFloat()
+			double input = state.random[thread].nextDouble()
 					* (testMaxRange - testMinRange);
 			if (testPointsResolution > 0.0f) {
 				input -= input % testPointsResolution;
 			}
 			input += testMinRange;
-			float output = evaluateFunction(input);
-			float error = evaluateSingleTestCase(interpreter, ind, -1, input,
+			double output = evaluateFunction(input);
+			double error = evaluateSingleTestCase(interpreter, ind, -1, input,
 					output);
 			if (error < hitThreshold) {
 				hits++;
@@ -226,10 +233,10 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 			errorSum += error;
 		}
 		float fitness;
-		if (Float.isInfinite(errorSum)) {
+		if (Double.isInfinite(errorSum)) {
 			fitness = Float.MAX_VALUE;
 		} else {
-			fitness = errorSum / numOfTestPoints;
+			fitness = (float)(errorSum / numOfTestPoints);
 		}
 		setFitness(state, thread, ind, fitness, hits);
 	}
@@ -244,26 +251,26 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 	 * @param output
 	 * @return
 	 */
-	public float evaluateSingleTestCase(Interpreter interpreter,
-			SemanticIndividual individual, int testCaseNo, float input, float output) {
+	public double evaluateSingleTestCase(Interpreter interpreter,
+			PshIndividual individual, int testCaseNo, double input, double output) {
 		interpreter.ClearStacks();
 		// pushing input value to the float stack number of times (typically once)
 		for (int i = 0; i < repeatFloatStack; i++) {
-			interpreter.floatStack().push(input);
+			interpreter.floatStack().push((float)input);
 		}
 		if (makeInputs) {
 			// setting input value to input stack
-			interpreter.inputStack().push((Float)input);
+			interpreter.inputStack().push((Float)((float)input));
 		}
 		// executing the program
 		interpreter.Execute(individual.program,
 				interpreter.getExecutionLimit());
 		// Penalize individual if there is no result on the stack.
-		if (interpreter.floatStack().size() == 0) {
+		if (penalizeIndividuals && interpreter.floatStack().size() == 0) {
 			return 1000.0f;
 		}
 		// compute result as absolute difference
-		float error = Math.abs(interpreter.floatStack().top() - output);
+		double error = Math.abs(interpreter.floatStack().top() - output);
 		return error;
 	}
 	
@@ -277,7 +284,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 		for (int i = 0; i < numOfTrainPoints; i++) {
 			states[i] = new InterpreterState();
 			// get training point
-			float input = trainPoints[i][0];
+			float input = (float)trainPoints[i][0];
 			// pushing input value to the float stack number of times (typically
 			// once)
 			for (int k = 0; k < repeatFloatStack; k++) {
@@ -316,11 +323,43 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 		return states;
 	}
 	
+	@Override
+	public void describe(EvolutionState state, Individual ind,
+			int subpopulation, int threadnum, int log) {
+
+		Interpreter interpreter = ((PshEvolutionState) state).interpreter[threadnum];
+		
+		for (int i = 0; i < numOfTrainPoints; i++) {
+			double input = trainPoints[i][0];
+			double output = trainPoints[i][1];
+			double answer = 0.0;
+			interpreter.ClearStacks();
+			// pushing input value to the float stack number of times (typically once)
+			for (int k = 0; k < repeatFloatStack; k++) {
+				interpreter.floatStack().push((float)input);
+			}
+			if (makeInputs) {
+				// setting input value to input stack
+				interpreter.inputStack().push((Float)((float)input));
+			}
+			// executing the program
+			interpreter.Execute(((PshIndividual)ind).program,
+					interpreter.getExecutionLimit());
+
+			if (interpreter.floatStack().size() == 0) {
+				answer = 0.0;
+			} else {
+				answer = interpreter.floatStack().top();
+			}
+			state.output.println("" + input + " " + output + " " + answer, log);
+		}
+	}
+
 	/**
 	 * Function that we're searching through evolutionary process
 	 * @param x argument of the function
 	 * @return value for given argument
 	 */
-	protected abstract float evaluateFunction(float x);
+	protected abstract double evaluateFunction(double x);
 
 }

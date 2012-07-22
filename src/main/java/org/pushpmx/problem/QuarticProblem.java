@@ -3,7 +3,7 @@ package org.pushpmx.problem;
 public class QuarticProblem extends FloatSymbolicRegression {
 
 	@Override
-	protected float evaluateFunction(float x) {
+	protected double evaluateFunction(double x) {
 		return x * x * x * x + 
 				x * x * x + 
 				x * x + 

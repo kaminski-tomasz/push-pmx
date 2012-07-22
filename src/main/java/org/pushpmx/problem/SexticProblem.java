@@ -3,9 +3,9 @@ package org.pushpmx.problem;
 public class SexticProblem extends FloatSymbolicRegression {
 
 	@Override
-	protected float evaluateFunction(float x) {
+	protected double evaluateFunction(double x) {
 		return x*x*x*x*x*x - 
-				2.0f * x*x*x*x + 
+				2.0 * x*x*x*x + 
 				x*x;
 	}
 
