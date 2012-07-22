@@ -24,9 +24,9 @@ public class DiscordanceMetricTest {
 		assertEquals(1, metric.getStackDistance(new float[0], new float[]{  1, 2 }), 0);
 		assertEquals(1, metric.getStackDistance(new float[]{ 1, 2 }, new float[0]), 0);
 		
-		assertEquals(1.f/2.f, metric.getStackDistance(new float[]{ 1, 2 }, new float[]{ 1, 3 }), 0);
-		assertEquals(1.f/3.f, metric.getStackDistance(new float[]{ 1, 2 }, new float[]{ 1, 2, 3 }), 0);
-		assertEquals(2.f/3.f, metric.getStackDistance(new float[]{ 1, 2 }, new float[]{ 1, 3, 4 }), 0);
+		assertEquals(1.0f/2.0, metric.getStackDistance(new float[]{ 1, 2 }, new float[]{ 1, 3 }), 0);
+		assertEquals(1.0/3.0, metric.getStackDistance(new float[]{ 1, 2 }, new float[]{ 1, 2, 3 }), 0);
+		assertEquals(2.0/3.0, metric.getStackDistance(new float[]{ 1, 2 }, new float[]{ 1, 3, 4 }), 0);
 
 		assertEquals(0, metric.getStackDistance(new float[]{ 1, 2 }, new float[]{ 1, 2 }), 0);
 		assertEquals(0, metric.getStackDistance(new float[]{ 1, 3, 4 }, new float[]{ 1, 3, 4 }), 0);
@@ -39,9 +39,9 @@ public class DiscordanceMetricTest {
 		assertEquals(1, metric.getStackDistance(new float[0], new float[]{  1, 2 }), 0);
 		assertEquals(1, metric.getStackDistance(new float[]{ 1, 2 }, new float[0]), 0);
 		
-		assertEquals(1.f/2.f, metric.getStackDistance(new float[]{ 1, 2 }, new float[]{ 1, 3 }), 0);
-		assertEquals(1.f/3.f, metric.getStackDistance(new float[]{ 1, 2 }, new float[]{ 3, 1, 2 }), 0);
-		assertEquals(2.f/3.f, metric.getStackDistance(new float[]{ 1, 2 }, new float[]{ 4, 1, 3  }), 0);
+		assertEquals(1.0/2.0, metric.getStackDistance(new float[]{ 1, 2 }, new float[]{ 1, 3 }), 0);
+		assertEquals(1.0/3.0, metric.getStackDistance(new float[]{ 1, 2 }, new float[]{ 3, 1, 2 }), 0);
+		assertEquals(2.0/3.0, metric.getStackDistance(new float[]{ 1, 2 }, new float[]{ 4, 1, 3  }), 0);
 
 		assertEquals(0, metric.getStackDistance(new float[]{ 1, 2 }, new float[]{ 1, 2 }), 0);
 		assertEquals(0, metric.getStackDistance(new float[]{ 1, 3, 4 }, new float[]{ 1, 3, 4 }), 0);

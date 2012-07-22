@@ -8,12 +8,4 @@ float.ln
 float.exp
 float.dup
 float.erc
-float.flush
-float.pop
-float.rot
-float.shove
-float.stackdepth
-float.swap
-float.yank
-float.yankdup
 input.makeinputs1

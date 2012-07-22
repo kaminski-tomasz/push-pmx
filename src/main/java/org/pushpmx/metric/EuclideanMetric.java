@@ -14,14 +14,14 @@ public class EuclideanMetric extends SemanticsMetric {
 	}
 
 	@Override
-	protected float getStackDistance(float[] stack1, float[] stack2) {
+	protected double getStackDistance(float[] stack1, float[] stack2) {
 		if (stack1 == null || stack2 == null)
-			throw new InternalError();
+			throw new InternalError("Stacks objects cannot be null");
 		if (stack1.length == 0 && stack2.length == 0) {
-			return 0.0f;
+			return 0.0;
 		}
 		if (stack1.length != stack2.length)
-			return Float.POSITIVE_INFINITY;
+			return Double.POSITIVE_INFINITY;
 		double distance = 0.0;
 		int length = stack1.length;
 		for (int i = 0; i < length; i++) {
@@ -29,7 +29,7 @@ public class EuclideanMetric extends SemanticsMetric {
 			squareDiff = squareDiff * squareDiff;
 			distance += squareDiff;
 		}
-		return (float) Math.sqrt(distance);
+		return Math.sqrt(distance);
 	}
 
 }

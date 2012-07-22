@@ -7,7 +7,7 @@ import org.ecj.psh.breed.MutationPipeline;
 import ec.EvolutionState;
 import ec.util.Parameter;
 
-public class FlatteningMutation extends MutationPipeline {
+public class FlatteningOperator extends MutationPipeline {
 
 	public static final String P_FLATMUTATE = "flatten";
 

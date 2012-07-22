@@ -107,10 +107,10 @@ public class Semantics {
 		sb.append(this.hashCode() + " {\n");
 		for (int i = 0; i < stackVector.size(); i++) {
 			sb.append("\t[");
-			for (int j = 0; j < stackVector.get(0).length; j++) {
+			for (int j = 0; j < stackVector.get(i).length; j++) {
 				if (j > 0) 
 					sb.append(",");
-				sb.append(stackVector.get(0)[j]);
+				sb.append(stackVector.get(i)[j]);
 			}
 			sb.append("]\n");
 		}

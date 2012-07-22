@@ -14,18 +14,18 @@ public class HammingMetric extends SemanticsMetric {
 	}
 
 	@Override
-	protected float getStackDistance(float[] stack1, float[] stack2) {
+	protected double getStackDistance(float[] stack1, float[] stack2) {
 		if (stack1 == null || stack2 == null)
 			throw new InternalError();
 		if (stack1.length == 0 && stack2.length == 0)
-			return 0.0f;
+			return 0.0;
 		if (stack1.length != stack2.length)
-			return 1.0f;
+			return 1.0;
 		for (int i = 0; i < stack1.length; i++) {
 			if (Math.abs(stack1[i] - stack2[i]) > epsilon)
-				return 1.0f;
+				return 1.0;
 		}
-		return 0.0f;
+		return 0.0;
 	}
 
 }

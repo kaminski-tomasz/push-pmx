@@ -25,7 +25,7 @@ import ec.util.Output;
 public class SemanticCrossoverTest {
 
 	PshIndividual[] parents = null;
-	SemanticCrossover semanticCrossover;
+	PartiallyMedialCrossover semanticCrossover;
 	protected PshEvolutionState state;
 	protected Output stateOutput;
 	protected MersenneTwisterFast[] stateRandom;
@@ -58,7 +58,7 @@ public class SemanticCrossoverTest {
 		state.interpreter[0] = interpreter;
 
 		// setting up operator
-		semanticCrossover = new SemanticCrossover();
+		semanticCrossover = new PartiallyMedialCrossover();
 
 		parents = new PshIndividual[2];
 		parents[0] = new PshIndividual();
@@ -134,15 +134,15 @@ public class SemanticCrossoverTest {
 			}
 		});
 		int size, cutpoint;
-		cutpoint = semanticCrossover.generateCuttingPoint(state, thread,
+		cutpoint = semanticCrossover.findCuttingPoint(state, thread,
 				size = 0);
 		assertTrue(cutpoint >= 0
 				&& cutpoint + semanticCrossover.replacementLength <= size);
-		cutpoint = semanticCrossover.generateCuttingPoint(state, thread,
+		cutpoint = semanticCrossover.findCuttingPoint(state, thread,
 				size = 1);
 		assertTrue(cutpoint >= 0
 				&& cutpoint + semanticCrossover.replacementLength <= size);
-		cutpoint = semanticCrossover.generateCuttingPoint(state, thread,
+		cutpoint = semanticCrossover.findCuttingPoint(state, thread,
 				size = 15);
 		assertTrue(cutpoint >= 0
 				&& cutpoint + semanticCrossover.replacementLength <= size);		
@@ -164,15 +164,15 @@ public class SemanticCrossoverTest {
 				return arg-1;
 			}
 		});
-		cutpoint = semanticCrossover.generateCuttingPoint(state, thread,
+		cutpoint = semanticCrossover.findCuttingPoint(state, thread,
 				size = 0);
 		assertTrue(cutpoint >= 0
 				&& cutpoint + semanticCrossover.replacementLength <= size);
-		cutpoint = semanticCrossover.generateCuttingPoint(state, thread,
+		cutpoint = semanticCrossover.findCuttingPoint(state, thread,
 				size = 1);
 		assertTrue(cutpoint >= 0
 				&& cutpoint + semanticCrossover.replacementLength <= size);
-		cutpoint = semanticCrossover.generateCuttingPoint(state, thread,
+		cutpoint = semanticCrossover.findCuttingPoint(state, thread,
 				size = 15);
 		assertTrue(cutpoint >= 0
 				&& cutpoint + semanticCrossover.replacementLength <= size);

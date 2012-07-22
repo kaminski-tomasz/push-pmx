@@ -4,7 +4,7 @@
 
 	<groupId>org</groupId>
 	<artifactId>push-pmx</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 	<packaging>jar</packaging>
 
 	<name>push-pmx</name>
@@ -33,7 +33,7 @@
 		<dependency>
 			<groupId>org</groupId>
 			<artifactId>ecj-psh</artifactId>
-			<version>1.0.5</version>
+			<version>1.0.6</version>
 		</dependency>
 
 		<!-- Other dependecies -->

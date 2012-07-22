@@ -17,21 +17,31 @@ import ec.EvolutionState;
 import ec.Individual;
 import ec.util.Parameter;
 
-public class SemanticCrossover extends CrossoverPipeline {
+public class PartiallyMedialCrossover extends CrossoverPipeline {
 
 	public static final String P_PMXOVER = "pmx-xover";
 	
-	public static final String P_SUBPROGRAMLEN = "subprogram-length";
-	public static final String P_SEARCHINGSTEPS = "searching-steps";
+	public static final String P_SUBPROGRAMLEN = "replacement-length";
+	public static final String P_SEARCHINGSTEPS = "steps";
 	public static final String P_METRIC = "metric";
-	public static final String P_GREEDY = "greedy-search";
+	public static final String P_GREEDY = "greedy";
 	public static final String P_SHUFFLE = "shuffle";
-		
+	public static final String P_DIVERGENCETYPE = "divergence";
+	
+	public static final int V_EQUIDISTANCE = 0;
+	public static final int V_GEOMETRICITY = 1;
+	
+	/** Type of the divergence to minimize */
+	public int divergenceType;
+	
 	/** Length of the exchanging subprograms */
 	public int replacementLength;
 
 	/** Set of the subprograms to be tested */
 	public ArrayList<Program> subprogramSpace;
+	
+	/** Buffer array for a size of the replacing programs */
+	public int[] sizeBuffer;
 	
 	/** Should subprograms subspace be shuffled before use */
 	public boolean shuffleSubprograms;
@@ -49,7 +59,7 @@ public class SemanticCrossover extends CrossoverPipeline {
 	public SemanticsMetric metric;
 	
 	/**
-	 * Should be applied greedy approach when searching in subprograms space
+	 * Should greedy approach be applied when searching the subprograms space
 	 */
 	public boolean greedySearch;
 	
@@ -63,8 +73,9 @@ public class SemanticCrossover extends CrossoverPipeline {
 	}
 
 	@Override
-	public SemanticCrossover clone() {
-		SemanticCrossover sc = (SemanticCrossover)super.clone();
+	public PartiallyMedialCrossover clone() {
+		PartiallyMedialCrossover sc = (PartiallyMedialCrossover) super.clone();
+		// we need to clone deeply only the permutation
 		sc.permutation = permutation.clone();
 		return sc;
 	}
@@ -78,9 +89,17 @@ public class SemanticCrossover extends CrossoverPipeline {
 		replacementLength = state.parameters.getIntWithDefault(
 				base.push(P_SUBPROGRAMLEN), def.push(P_SUBPROGRAMLEN), 1);
 
-		// generate subprograms (we don't involve any RNG here)
+		// generate subprograms (we don't involve any RNG here). Moreover,
+		// generated programs contain String names of instructions, not
+		// references to objects which belong to the interpreter
 		subprogramSpace = ((SemanticInterpreter) ((PshEvolutionState) state).interpreter[0])
 				.generateAllPrograms(replacementLength);
+		
+		// create the space of replacing subprograms 
+		sizeBuffer = new int[subprogramSpace.size()];
+		for (int i = 0; i < subprogramSpace.size(); i++) {
+			sizeBuffer[i] = subprogramSpace.get(i).programsize(); 
+		}
 		
 		// The number of steps for searching the space of subprograms
 		searchingSteps = state.parameters.getIntWithDefault(
@@ -92,16 +111,28 @@ public class SemanticCrossover extends CrossoverPipeline {
 		metric = (SemanticsMetric) (state.parameters.getInstanceForParameter(p,
 				d, SemanticsMetric.class));
 		metric.setup(state, p);
-				
+
 		// should we shuffle the space of subprograms
 		shuffleSubprograms = state.parameters.getBoolean(base.push(P_SHUFFLE),
-				def.push(P_SHUFFLE), true);		
+				def.push(P_SHUFFLE), true);
 		
-		permutation = new Permutation(subprogramSpace.size());		
+		permutation = new Permutation(subprogramSpace.size());
 		
-		// should we stop searching when found the improvement of the distance measure
+		// should we stop searching when we find the improvement of the divergence
 		greedySearch = state.parameters.getBoolean(base.push(P_GREEDY),
 				def.push(P_GREEDY), false);
+		
+		// type of the divergence to minimize
+		p = base.push(P_DIVERGENCETYPE);
+		d = def.push(P_DIVERGENCETYPE);
+		String divergenceTypeString = state.parameters.getString(p, d);
+		if ("equidistance".equals(divergenceTypeString)) {
+			divergenceType = V_EQUIDISTANCE;
+		} else if ("geometricity".equals(divergenceTypeString)) {
+			divergenceType = V_GEOMETRICITY;
+		} else {
+			state.output.fatal("Unknown value " + divergenceTypeString, p, d);
+		}
 	}
 
 	@Override
@@ -109,9 +140,8 @@ public class SemanticCrossover extends CrossoverPipeline {
 			Individual[] inds, EvolutionState state, int thread) {
 
 		problem = (FloatSymbolicRegression) state.evaluator.p_problem.clone();
+		interpreter = (SemanticInterpreter) ((PshEvolutionState) state).interpreter[thread];
 
-		interpreter = (SemanticInterpreter)((PshEvolutionState) state).interpreter[thread];
-		
 		return super.produce(min, max, start, subpopulation, inds, state,
 				thread);
 	}
@@ -120,26 +150,30 @@ public class SemanticCrossover extends CrossoverPipeline {
 	protected void crossover(EvolutionState state, int thread,
 			boolean breedSecondParent) {
 
-		// parents size
-		int p1size = (int) parents[0].program.size();
-		int p2size = (int) parents[1].program.size();
+		Program p1 = parents[0].program;
+		Program p2 = parents[1].program;
 
-		if (p1size <= replacementLength || p2size <= replacementLength)
+		// parents length (precisely, sizes of their root stacks)
+		int p1Length = p1.size();
+		int p2Length = p2.size();
+
+		if (p1Length <= 0 || p2Length <= 0 || p1Length < replacementLength
+				|| p2Length < replacementLength)
 			return;
 
 		// generate cutting points drawn from random
 		int p1cutpoint = 0, p2cutpoint = 0;
 		if (!homologous) {
-			p1cutpoint = generateCuttingPoint(state, thread, p1size);
-			p2cutpoint = generateCuttingPoint(state, thread, p2size);
+			p1cutpoint = findCuttingPoint(state, thread, p1Length);
+			p2cutpoint = findCuttingPoint(state, thread, p2Length);
 		} else {
-			p1cutpoint = p2cutpoint = generateCuttingPoint(state, thread,
-					Math.min(p1size, p2size));
+			p1cutpoint = p2cutpoint = findCuttingPoint(state, thread,
+					Math.min(p1Length, p2Length));
 		}
 
 		// prepare required subprograms of parents
-		Program[] p1parts = decomposeProgram(parents[0].program, p1size, p1cutpoint);
-		Program[] p2parts = decomposeProgram(parents[1].program, p2size, p2cutpoint);
+		Program[] p1parts = decomposeProgram(p1, p1Length, p1cutpoint);
+		Program[] p2parts = decomposeProgram(p2, p2Length, p2cutpoint);
 
 		// determine memory states of interpreter for each traininig points
 		// after executing the prefix of the parent program
@@ -156,62 +190,95 @@ public class SemanticCrossover extends CrossoverPipeline {
 		// replacementLength location
 		Semantics p1Semantics = computeSemantics(p1MemoryStateArray, p1parts[1]);
 		Semantics p2Semantics = computeSemantics(p2MemoryStateArray, p2parts[1]);
-
+		distance_p1_p2 = metric.getDistance(p1Semantics, p2Semantics);
+		
+		if (divergenceType == V_GEOMETRICITY && Double.isInfinite(distance_p1_p2)) {
+			// we can't find semantically medial offspring for programs
+			// that are infinitely distant from each other in semantic space 
+			return;
+		}
+		
 		if (shuffleSubprograms) {
 			permutation.shuffle(state, thread, searchingSteps);
 		}
 		
-		int index = permutation.get(0);
-		Program replacement = subprogramSpace.get(index);
+		int p1Size = p1.programsize();
+		int p2Size = p2.programsize();
+		int p1ReplacedSize = p1parts[1].programsize();
+		int p2ReplacedSize = p2parts[1].programsize();
+		int maxPointsInProgram = interpreter.getMaxPointsInProgram();
+		
+		Program replacement = null;
 		Program bestReplacement = replacement;
-
-		// determine the semantics of the offspring with the given subprogram
-		Semantics ofSemantics = computeSemantics(p2MemoryStateArray, replacement);
-
-		float divergence = computeDivergence(p1Semantics, p2Semantics,
-				ofSemantics);
-
-		// main loop
-		for (int step = 1; divergence > 0.0f && step < searchingSteps
-				&& step < subprogramSpace.size(); step++) {
-			
-			index = permutation.get(step);
+		double divergence = Double.POSITIVE_INFINITY;
+		double bestDivergence = divergence;
+		int step = 0;
+		Semantics ofSemantics = null;
+		do {
+			// get the replacing program and its size (size, not length of a root stack)
+			int index = permutation.get(step);
 			replacement = subprogramSpace.get(index);
+			int replacementSize = sizeBuffer[index];
 
-			// determine the semantics of the offspring with the given
-			// subprogram
-			InterpreterState[] which = (step % 2 == 0) ? p1MemoryStateArray
-					: p2MemoryStateArray;
-			ofSemantics = computeSemantics(which, replacement);
+			// determine the interpreter memory state to be used and check whether size of the offspring is correct
+			InterpreterState[] whichMemoryState;
+			boolean isSizeCorrect;
 
-			// compute divergenvce
-			float newDivergence = computeDivergence(p1Semantics, p2Semantics,
-					ofSemantics);
-
-			if (newDivergence < divergence) {
-				divergence = newDivergence;
-				bestReplacement = replacement;
-				if (greedySearch)
-					break;
+			if (breedSecondParent) {
+				whichMemoryState = (step % 2 == 0) ? p1MemoryStateArray
+						: p2MemoryStateArray;
+				isSizeCorrect = ((p1Size - p1ReplacedSize + replacementSize) <= maxPointsInProgram)
+						&& ((p2Size - p2ReplacedSize + replacementSize) <= maxPointsInProgram);
+			} else {
+				whichMemoryState = p1MemoryStateArray;
+				isSizeCorrect = ((p1Size - p1ReplacedSize + replacementSize) <= maxPointsInProgram);
 			}
 
-		}
-		if (Float.isInfinite(divergence))
-			return;
-		if (Float.isNaN(divergence))
-			return;
-				
+			// if size is too big, check the next replacing subprogram
+			if (!isSizeCorrect)
+				continue;
+
+			// determine the semantics of the offspring with the given subprogram
+			ofSemantics = computeSemantics(whichMemoryState,
+					replacement);
+
+			// compute divergence
+			divergence = computeDivergence(p1Semantics, p2Semantics,
+					ofSemantics);
+			if (divergence < 0.0) {
+				// fix rounding errors
+				divergence = 0.0;
+			}
+			// check if we found improvement
+			if (bestReplacement != null) {
+				if (divergence < bestDivergence) {
+					bestReplacement = replacement;
+					bestDivergence = divergence;
+					if (greedySearch)
+						break;
+				}
+			} else {
+				bestReplacement = replacement;
+				bestDivergence = divergence;
+			}
+			++ step;
+		} while (step < searchingSteps && step < subprogramSpace.size()
+				&& divergence > metric.epsilon);
 		
+		if (bestReplacement == null || Double.isInfinite(bestDivergence))
+			return;
+		if (Double.isNaN(bestDivergence))
+			throw new InternalError("Best divergence is NaN");		// should not happen
+
 		p1parts[1] = bestReplacement; // replace the middle part
 		joinDecomposedProgram(p1parts, parents[0].program);
 		parents[0].evaluated = false;
-		
+
 		if (breedSecondParent) {
 			p2parts[1] = bestReplacement; // replace the middle part
 			joinDecomposedProgram(p2parts, parents[1].program);
 			parents[1].evaluated = false;
 		}
-		
 	}
 
 	/**
@@ -252,7 +319,7 @@ public class SemanticCrossover extends CrossoverPipeline {
 	 *            program size
 	 * @return
 	 */
-	public int generateCuttingPoint(EvolutionState state, int thread,
+	public int findCuttingPoint(EvolutionState state, int thread,
 			int programSize) {
 		int cuttingPoint = state.random[thread].nextInt(programSize
 				- replacementLength + 1);
@@ -277,23 +344,41 @@ public class SemanticCrossover extends CrossoverPipeline {
 		return semantics;
 	}
 	
-	// abstract public float computeDivergence(Semantics p1, Semantics p2,
-	// Semantics o);
-	// TODO
-	public float computeDivergence(Semantics p1, Semantics p2, Semantics o) {
-		
-		// divergence from equidistance
-		float distance_p1_o = metric.getDistance(p1, o);
-		float distance_p2_o = metric.getDistance(p2, o);
-		float result = Math.abs(distance_p1_o - distance_p2_o);
-		return result;
-
-		// divergence from geometricity
-//		 return metric.getDistance(p1, o) + metric.getDistance(p2, o) -
-//		 metric.getDistance(p1, p2);
+	/**
+	 * Computes divergence from equidistance or geometricity
+	 * 
+	 * @param p1
+	 *            semantics of parent1
+	 * @param p2
+	 *            semantics of parent2
+	 * @param o
+	 *            semantics of offspring
+	 * @return divergence from chosen measure
+	 */
+	public double computeDivergence(Semantics p1, Semantics p2, Semantics o) {
+		// compute required distances
+		double distance_p1_o = metric.getDistance(p1, o);
+		if (Double.isInfinite(distance_p1_o)) {
+			return Double.POSITIVE_INFINITY;
+		}
+		double distance_p2_o = metric.getDistance(p2, o);
+		if (Double.isInfinite(distance_p2_o)) {
+			return Double.POSITIVE_INFINITY;
+		}
+		switch (divergenceType) {
+		case V_GEOMETRICITY:
+			// compute divergence from geometricity
+			return distance_p1_o + distance_p2_o - distance_p1_p2;
+		default:
+		case V_EQUIDISTANCE:
+			// compute divergence from equidistance
+			return Math.abs(distance_p1_o - distance_p2_o);
+		}
 	}
 
 	/** temporary helper fields */
 	private FloatSymbolicRegression problem = null;
 	private SemanticInterpreter interpreter = null;
+	private double distance_p1_p2;
+
 }

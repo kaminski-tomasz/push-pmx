@@ -1,7 +1,6 @@
 package org.pushpmx.metric;
 
 import org.ecj.psh.PshDefaults;
-
 import ec.EvolutionState;
 import ec.util.Parameter;
 
@@ -27,13 +26,13 @@ public class DiscordanceMetric extends SemanticsMetric {
 	}
 	
 	@Override
-	protected float getStackDistance(float[] stack1, float[] stack2) {
+	protected double getStackDistance(float[] stack1, float[] stack2) {
 		if (stack1 == null || stack2 == null)
 			throw new InternalError();
 		if (stack1.length == 0 && stack2.length == 0)
-			return 0.0f;
+			return 0.0;
 		if (stack1.length == 0 || stack2.length == 0)
-			return 1.0f;
+			return 1.0;
 		int mismatches = 0;
 		int maxLength = Math.max(stack1.length, stack2.length);
 		int minLength = Math.min(stack1.length, stack2.length);
@@ -49,7 +48,7 @@ public class DiscordanceMetric extends SemanticsMetric {
 					mismatches++;
 			}
 		}
-		return (maxLength - minLength + mismatches) / (float) maxLength;
+		return (maxLength - minLength + mismatches) / (double) maxLength;
 	}
 
 }
