@@ -1,0 +1,11 @@
+
+# Nguyen-5 problem settings
+eval.problem 							= org.pushpmx.problem.Nguyen5Problem
+
+eval.problem.train-min-range			= -1.0
+eval.problem.train-max-range			= 1.0
+eval.problem.train-points				= 20
+
+eval.problem.test-min-range				= -1.0
+eval.problem.test-max-range				= 1.0
+eval.problem.test-points				= 20

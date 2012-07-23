@@ -1,0 +1,11 @@
+
+# Keijzer-4 problem settings
+eval.problem 							= org.pushpmx.problem.Keijzer4Problem
+
+eval.problem.train-min-range			= 0.0
+eval.problem.train-max-range			= 10.0
+eval.problem.train-points				= 20
+
+eval.problem.test-min-range				= 0.0
+eval.problem.test-max-range				= 10.0
+eval.problem.test-points				= 20

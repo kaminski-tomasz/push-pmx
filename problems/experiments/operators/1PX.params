@@ -1,0 +1,9 @@
+
+# 1PX
+psh.breed.one-point-xover.source.0			= ec.select.TournamentSelection
+psh.breed.one-point-xover.source.1			= same
+psh.breed.one-point-xover.toss				= true
+psh.breed.one-point-xover.homologous		= false
+psh.breed.one-point-xover.tries				= 100
+
+pop.subpop.0.species.pipe.source.0.source.0			= org.ecj.psh.breed.OnePointCrossover

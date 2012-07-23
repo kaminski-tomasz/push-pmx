@@ -8,6 +8,8 @@ seed.1 				= time
 seed.2 				= time 
 seed.3 				= time
 
+jobs				= 30
+
 checkpoint 			= false
 checkpoint-modulo	= 1
 prefix				= psh
@@ -42,10 +44,10 @@ pop.subpop.0.species.fitness	= ec.gp.koza.KozaFitness
 
 ###### Statistics
 
-#stat				= org.pushpmx.PshStatistics
-#stat.file			= $out/run.stat
-#stat.gather-full	= true
-#stat.summary-file	= $out/run-summary.stat
+stat				= org.pushpmx.PshStatistics
+stat.file			= run.stat
+stat.gather-full	= true
+stat.summary-file	= summary.stat
 
 
 ############ Default Interpreter settings
@@ -66,17 +68,17 @@ psh.interpreter.random-float-res		= 0.01
 
 psh.interpreter.instruction-list		= instructions.txt
 
-####### Specifying the problem
+####### Defalt problem settings 
 
 #eval.problem 							= org.pushpmx.problem.QuarticProblem
 
-#eval.problem.train-min-range			= -1.0
-#eval.problem.train-max-range			= 1.0
-#eval.problem.train-points				= 20
-#
-#eval.problem.test-min-range				= -1.0
-#eval.problem.test-max-range				= 1.0
-#eval.problem.test-points				= 20
+eval.problem.train-min-range			= -1.0
+eval.problem.train-max-range			= 1.0
+eval.problem.train-points				= 20
+
+eval.problem.test-min-range				= -1.0
+eval.problem.test-max-range				= 1.0
+eval.problem.test-points				= 20
 
 eval.problem.repeat-float-stack 		= 5
 eval.problem.make-inputs 				= true
@@ -109,6 +111,21 @@ psh.breed.psh-simplify.flatten-prob			= 0.20
 # Metric settings
 psh.discordance-metric.compare-tails		= true
 psh.discordance-metric.epsilon				= 0.0
+
+# breeding pipelines
+pop.subpop.0.species.pipe				= org.pushpmx.breed.FlatteningOperator
+pop.subpop.0.species.pipe.likelihood 	= 1.0
+
+pop.subpop.0.species.pipe.source.0					= ec.breed.MultiBreedingPipeline
+pop.subpop.0.species.pipe.source.0.num-sources 		= 2
+pop.subpop.0.species.pipe.source.0.generate-max		= true
+
+# Following line should be specified in operator's parameter file
+#pop.subpop.0.species.pipe.source.0.source.0			= org.ecj.psh.breed.OnePointCrossover
+pop.subpop.0.species.pipe.source.0.source.0.prob	= 0.95
+
+pop.subpop.0.species.pipe.source.0.source.1			= org.ecj.psh.breed.PshMutation
+pop.subpop.0.species.pipe.source.0.source.1.prob	= 0.05
 
 #print-unaccessed-params	= true
 
