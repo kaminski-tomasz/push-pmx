@@ -193,7 +193,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 			double output = trainPoints[i][1];
 			double error = evaluateSingleTestCase(interpreter, ind, i, input,
 					output);
-			if (error < hitThreshold) {
+			if (error <= hitThreshold) {
 				hits++;
 			}
 			errorSum += error;
@@ -227,7 +227,7 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 			double output = evaluateFunction(input);
 			double error = evaluateSingleTestCase(interpreter, ind, -1, input,
 					output);
-			if (error < hitThreshold) {
+			if (error <= hitThreshold) {
 				hits++;
 			}
 			errorSum += error;

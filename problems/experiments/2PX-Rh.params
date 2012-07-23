@@ -1,0 +1,24 @@
+
+parent.0 = common.params
+
+# 2PX
+psh.breed.two-point-xover.source.0			= ec.select.TournamentSelection
+psh.breed.two-point-xover.source.1			= same
+psh.breed.two-point-xover.toss				= true
+psh.breed.two-point-xover.homologous		= true
+psh.breed.two-point-xover.tries				= 100
+psh.breed.two-point-xover.replacement-length = 0
+
+# breeding pipelines
+pop.subpop.0.species.pipe				= org.pushpmx.breed.FlatteningOperator
+pop.subpop.0.species.pipe.likelihood 	= 1.0
+
+pop.subpop.0.species.pipe.source.0					= ec.breed.MultiBreedingPipeline
+pop.subpop.0.species.pipe.source.0.num-sources 		= 2
+pop.subpop.0.species.pipe.source.0.generate-max		= true
+
+pop.subpop.0.species.pipe.source.0.source.0			= org.ecj.psh.breed.TwoPointCrossover
+pop.subpop.0.species.pipe.source.0.source.0.prob	= 0.95
+
+pop.subpop.0.species.pipe.source.0.source.1			= org.ecj.psh.breed.PshMutation
+pop.subpop.0.species.pipe.source.0.source.1.prob	= 0.05

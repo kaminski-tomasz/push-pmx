@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.ecj.psh.PshEvaluator;
 import org.ecj.psh.PshEvolutionState;
 import org.ecj.psh.PshIndividual;
 import org.ecj.psh.util.Simplifier;
@@ -48,6 +49,8 @@ public class PshStatistics extends SimpleShortStatistics {
 	private KozaFitness[] best_of_run_fitness_test;
 
 	private int[] best_of_run_gen;
+	
+	private long totalTimeTaken;
     
 	private SemanticInterpreter interpreter;
 	
@@ -111,6 +114,7 @@ public class PshStatistics extends SimpleShortStatistics {
 		super.preInitializationStatistics(state);
 		if (doFull) {
 			lastTotalStepsTaken = getTotalStepsTaken(state);
+			totalTimeTaken = System.currentTimeMillis();
 		}
 	}
 	
@@ -320,6 +324,7 @@ public class PshStatistics extends SimpleShortStatistics {
 		float simplifyByFlattenProb = 0.2f;
 		
 		state.output.print(""+ ((result == EvolutionState.R_SUCCESS) ? 1 : 0) + 
+				" " + (System.currentTimeMillis() - totalTimeTaken) + 
 				" " + getTotalStepsTaken(state) + " " , summarylog);
 
 
@@ -338,12 +343,25 @@ public class PshStatistics extends SimpleShortStatistics {
 		for (int x = 0; x < state.population.subpops.length; x++) {
 			state.output.print("" + (best_of_run_gen[x]) + " ", summarylog);
 			
+			state.output.print("" + (((((KozaFitness) best_of_run[x].fitness)
+					.standardizedFitness()) <= ((PshEvaluator)state.evaluator).idealThreshold)?1:0)  + " ", summarylog);
+			
 			state.output.print("" + (((KozaFitness) best_of_run[x].fitness)
 									.standardizedFitness()) + " ", summarylog);
 
+			state.output.print(""
+					+ (((KozaFitness) best_of_run[x].fitness).hits) + " ",
+					summarylog);
+			
+			state.output.print("" + ((((best_of_run_fitness_test[x])
+					.standardizedFitness()) <= ((PshEvaluator)state.evaluator).idealThreshold)?1:0)  + " ", summarylog);
+			
 			state.output.print("" + (best_of_run_fitness_test[x]).
 									standardizedFitness() + " ", summarylog);
 
+			state.output.print("" + (best_of_run_fitness_test[x]).hits + " ",
+					summarylog);
+			
 			state.output.print("" + (double)((PshIndividual) best_of_run[x]).size()
 					+ " ", summarylog);
 			state.output.println(

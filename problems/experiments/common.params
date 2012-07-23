@@ -1,9 +1,12 @@
 
 ####### EvolutionState settings
 
-evalthreads			= 1
-breedthreads 		= 1
+evalthreads			= 4
+breedthreads 		= 4
 seed.0 				= time
+seed.1 				= time 
+seed.2 				= time 
+seed.3 				= time
 
 checkpoint 			= false
 checkpoint-modulo	= 1
@@ -39,13 +42,10 @@ pop.subpop.0.species.fitness	= ec.gp.koza.KozaFitness
 
 ###### Statistics
 
-stat				= ec.simple.SimpleStatistics
-stat.file			= $out/out.stat
-stat.num-children	= 1
-
-stat.child.0		= org.pushpmx.PshShortStatistics
-stat.child.0.gather-full = true
-stat.child.0.file	= $out/out-short.stat
+#stat				= org.pushpmx.PshStatistics
+#stat.file			= $out/run.stat
+#stat.gather-full	= true
+#stat.summary-file	= $out/run-summary.stat
 
 
 ############ Default Interpreter settings
@@ -68,70 +68,47 @@ psh.interpreter.instruction-list		= instructions.txt
 
 ####### Specifying the problem
 
-eval.problem 							= org.pushpmx.problem.QuarticProblem
-eval.problem.train-points 				= 20
+#eval.problem 							= org.pushpmx.problem.QuarticProblem
+
+#eval.problem.train-min-range			= -1.0
+#eval.problem.train-max-range			= 1.0
+#eval.problem.train-points				= 20
+#
+#eval.problem.test-min-range				= -1.0
+#eval.problem.test-max-range				= 1.0
+#eval.problem.test-points				= 20
+
 eval.problem.repeat-float-stack 		= 5
 eval.problem.make-inputs 				= true
+eval.problem.hit-threshold				= 0.01
+eval.problem.test-points-resolution		= 0.0
 
+eval.problem.penalize					= false
 eval.problem.include-hits	 			= false
 eval.problem.hits-factor				= 10.0
 
 
-####### Specifying default breeding pipelines parametersMutationPipeline
+####### Specifying default breeding pipelines parameters
  
 # Tournament selection settings
 select.tournament.size					= 7
 
 # Reproduction pipeline settings
 breed.reproduce.source.0 				= ec.select.TournamentSelection
- 
+
 # Mutation pipeline settings
 psh.breed.psh-mutate.source.0				= ec.select.TournamentSelection
 psh.breed.psh-mutate.use-fair				= true
-psh.breed.psh-mutate.fair-mutation-range	= 1.0
+psh.breed.psh-mutate.fair-mutation-range	= 0.30
 
 # Simplification pipeline settings
 psh.breed.psh-simplify.source.0				= ec.select.TournamentSelection
 psh.breed.psh-simplify.steps				= 20
 psh.breed.psh-simplify.flatten-prob			= 0.20
 
-# Psh crossover pipeline settings
-psh.breed.psh-xover.source.0			= ec.select.TournamentSelection
-psh.breed.psh-xover.source.1			= same
-psh.breed.psh-xover.toss				= true
-
-# One-point crossover pipeline settings
-psh.breed.one-point-xover.source.0			= ec.select.TournamentSelection
-psh.breed.one-point-xover.source.1			= same
-psh.breed.one-point-xover.toss				= true
-psh.breed.one-point-xover.homologous		= false
-psh.breed.two-point-xover.tries				= 0
-
-# Two-point crossover pipeline settings
-psh.breed.two-point-xover.source.0			= ec.select.TournamentSelection
-psh.breed.two-point-xover.source.1			= same
-psh.breed.two-point-xover.toss				= true
-psh.breed.two-point-xover.homologous		= false
-psh.breed.two-point-xover.tries				= 1
-psh.breed.two-point-xover.replacement-length = 2
-
-
-# PMX crossover pipeline settings
-psh.breed.pmx-xover.source.0				= ec.select.TournamentSelection
-psh.breed.pmx-xover.source.1				= same
-psh.breed.pmx-xover.toss					= false
-psh.breed.pmx-xover.homologous				= true
-
-psh.breed.pmx-xover.metric					= org.pushpmx.metric.DiscordanceMetric
-psh.breed.pmx-xover.replacement-length		= 2
-psh.breed.pmx-xover.divergence				= equidistance
-psh.breed.pmx-xover.steps					= 100
-psh.breed.pmx-xover.greedy					= false
-psh.breed.pmx-xover.shuffle					= true
-
 # Metric settings
 psh.discordance-metric.compare-tails		= true
 psh.discordance-metric.epsilon				= 0.0
-psh.discordance-metric.compare-tails		= true
 
+#print-unaccessed-params	= true
 

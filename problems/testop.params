@@ -1,9 +1,12 @@
 
 ####### EvolutionState settings
 
-evalthreads			= 1
-breedthreads 		= 1
-seed.0 				= time 
+evalthreads			= 4
+breedthreads 		= 4
+seed.0 				= time
+seed.1 				= time 
+seed.2 				= time 
+seed.3 				= time  
 
 checkpoint 			= false
 checkpoint-modulo	= 1
@@ -18,7 +21,7 @@ state					= org.ecj.psh.PshEvolutionState
 eval					= org.ecj.psh.PshEvaluator
 eval.ideal-threshold	= 1.0E-6
 
-generations				= 10
+generations				= 250
 quit-on-run-complete	= false
 
 
@@ -67,7 +70,7 @@ psh.interpreter.instruction-list		= instructions.txt
 ####### Specifying the problem
 
 eval.problem 							= org.pushpmx.problem.QuarticProblem
-eval.problem.train-points 				= 20
+
 eval.problem.repeat-float-stack 		= 5
 eval.problem.make-inputs 				= true
 
@@ -80,7 +83,7 @@ eval.problem.test-max-range				= 1.0
 eval.problem.test-points				= 40
 eval.problem.test-points-resolution		= 0.0
 
-eval.problem.penalize					= false
+eval.problem.penalize					= true
 
 eval.problem.include-hits	 			= false
 eval.problem.hits-factor				= 10.0
@@ -128,7 +131,7 @@ psh.breed.two-point-xover.replacement-length = 2
 # PMX crossover pipeline settings
 psh.breed.pmx-xover.source.0				= ec.select.TournamentSelection
 psh.breed.pmx-xover.source.1				= same
-psh.breed.pmx-xover.toss					= false
+psh.breed.pmx-xover.toss					= true
 psh.breed.pmx-xover.homologous				= true
 
 psh.breed.pmx-xover.metric					= org.pushpmx.metric.DiscordanceMetric
@@ -141,7 +144,6 @@ psh.breed.pmx-xover.shuffle					= true
 # Metric settings
 psh.discordance-metric.compare-tails		= true
 psh.discordance-metric.epsilon				= 0.0
-psh.discordance-metric.compare-tails		= true
 
 ####### Specifying PushGP breeding pipelines 
 
@@ -179,8 +181,8 @@ pop.subpop.0.species.pipe.source.0					= ec.breed.MultiBreedingPipeline
 pop.subpop.0.species.pipe.source.0.num-sources 		= 1
 pop.subpop.0.species.pipe.source.0.generate-max		= true
 
-#pop.subpop.0.species.pipe.source.0.source.0			= org.pushpmx.breed.PartiallyMedialCrossover
-pop.subpop.0.species.pipe.source.0.source.0				= org.ecj.psh.breed.PshCrossover
+pop.subpop.0.species.pipe.source.0.source.0			= org.pushpmx.breed.PartiallyMedialCrossover
+#pop.subpop.0.species.pipe.source.0.source.0				= org.ecj.psh.breed.PshCrossover
 #pop.subpop.0.species.pipe.source.0.source.0				= org.ecj.psh.breed.PshMutation
 #pop.subpop.0.species.pipe.source.0.source.0			= org.ecj.psh.breed.TwoPointCrossover
 #pop.subpop.0.species.pipe.source.0.source.0				= org.ecj.psh.breed.OnePointCrossover
@@ -195,5 +197,5 @@ pop.subpop.0.species.pipe.source.0.source.0.prob		= 1.00
 #pop.subpop.0.species.pipe.source.0.source.3			= ec.breed.ReproductionPipeline
 #pop.subpop.0.species.pipe.source.0.source.3.prob		= 0.00
 
-print-unaccessed-params	= true
+#print-unaccessed-params	= true
 
