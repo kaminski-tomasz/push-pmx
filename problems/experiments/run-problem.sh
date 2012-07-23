@@ -55,8 +55,8 @@ if [ "${EXP_COMPRESS}" == "true" ] ; then
 	if [ -z "$EXP_COMP_DIR" ] ; then
 		export EXP_COMP_DIR=$EXP_ROOT/compressed
 		echo "EXP_COMP_DIR is not set, assuming ${EXP_COMP_DIR}"
-		mkdir -p $EXP_COMP_DIR
 	fi
+	mkdir -p $EXP_COMP_DIR
 fi 
 
 ######################################################################################
@@ -93,7 +93,7 @@ while (( "$#" )); do
 done
 
 if [ "${EXP_COMPRESS}" == "true" ] ; then
-	package=${problem}.${exp_no}_`date +%x_%X`.tar.gz
+	package=${problem}.${exp_no}_`date +%x_%H_%M_%S`.tar.gz
 	tar -C ${EXP_RESULTS} -zcf ${EXP_COMP_DIR}/${package} ${result_dirs}
 fi 
 
