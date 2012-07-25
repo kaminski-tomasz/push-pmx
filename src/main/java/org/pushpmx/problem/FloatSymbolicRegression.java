@@ -262,9 +262,12 @@ public abstract class FloatSymbolicRegression extends PshProblem {
 			// setting input value to input stack
 			interpreter.inputStack().push((Float)((float)input));
 		}
-		// executing the program
+		// executing the program. The condition (testCaseNo >= ... provides the
+		// information whether instruction steps and execution evaluations
+		// should be counted. For testing set they aren't because computing
+		// testing points doesn't take part in evolutionary process
 		interpreter.Execute(individual.program,
-				interpreter.getExecutionLimit());
+				interpreter.getExecutionLimit(), (testCaseNo >= 0) && (testCaseNo < numOfTrainPoints));
 		// Penalize individual if there is no result on the stack.
 		if (penalizeIndividuals && interpreter.floatStack().size() == 0) {
 			return 1000.0f;

@@ -8,4 +8,3 @@ float.ln
 float.exp
 float.dup
 float.erc
-input.makeinputs1

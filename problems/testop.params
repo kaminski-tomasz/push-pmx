@@ -22,7 +22,7 @@ eval					= org.ecj.psh.PshEvaluator
 eval.ideal-threshold	= 1.0E-6
 
 generations				= 250
-quit-on-run-complete	= false
+quit-on-run-complete	= true
 
 
 ####### Population settings
@@ -71,7 +71,7 @@ psh.interpreter.instruction-list		= instructions.txt
 
 eval.problem 							= org.pushpmx.problem.QuarticProblem
 
-eval.problem.repeat-float-stack 		= 5
+eval.problem.repeat-float-stack 		= 10
 eval.problem.make-inputs 				= true
 
 eval.problem.train-min-range			= -1.0
@@ -80,7 +80,7 @@ eval.problem.train-points				= 20
 
 eval.problem.test-min-range				= -1.0
 eval.problem.test-max-range				= 1.0
-eval.problem.test-points				= 40
+eval.problem.test-points				= 20
 eval.problem.test-points-resolution		= 0.0
 
 eval.problem.penalize					= true
@@ -124,8 +124,8 @@ psh.breed.two-point-xover.source.0			= ec.select.TournamentSelection
 psh.breed.two-point-xover.source.1			= same
 psh.breed.two-point-xover.toss				= true
 psh.breed.two-point-xover.homologous		= false
-psh.breed.two-point-xover.tries				= 1
-psh.breed.two-point-xover.replacement-length = 2
+psh.breed.two-point-xover.tries				= 0
+psh.breed.two-point-xover.replacement-length = 0
 
 
 # PMX crossover pipeline settings

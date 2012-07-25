@@ -8,7 +8,7 @@ seed.1 				= time
 seed.2 				= time 
 seed.3 				= time
 
-jobs				= 30
+jobs				= 100
 
 checkpoint 			= false
 checkpoint-modulo	= 1
@@ -23,7 +23,7 @@ state					= org.ecj.psh.PshEvolutionState
 eval					= org.ecj.psh.PshEvaluator
 eval.ideal-threshold	= 1.0E-6
 
-generations				= 250
+generations				= 300
 quit-on-run-complete	= false
 
 
@@ -81,7 +81,7 @@ eval.problem.test-max-range				= 1.0
 eval.problem.test-points				= 20
 
 eval.problem.repeat-float-stack 		= 5
-eval.problem.make-inputs 				= true
+eval.problem.make-inputs 				= false
 eval.problem.hit-threshold				= 0.01
 eval.problem.test-points-resolution		= 0.0
 
@@ -101,7 +101,7 @@ breed.reproduce.source.0 				= ec.select.TournamentSelection
 # Mutation pipeline settings
 psh.breed.psh-mutate.source.0				= ec.select.TournamentSelection
 psh.breed.psh-mutate.use-fair				= true
-psh.breed.psh-mutate.fair-mutation-range	= 0.30
+psh.breed.psh-mutate.fair-mutation-range	= 0.50
 
 # Simplification pipeline settings
 psh.breed.psh-simplify.source.0				= ec.select.TournamentSelection

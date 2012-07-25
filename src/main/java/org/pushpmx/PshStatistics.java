@@ -50,9 +50,7 @@ public class PshStatistics extends SimpleShortStatistics {
 
 	private int[] best_of_run_gen;
 	
-	private long totalTimeTaken;
-    
-	private SemanticInterpreter interpreter;
+	private long totalTimeTaken;    
 	
 	@Override
 	public void setup(final EvolutionState state, final Parameter base) {
@@ -70,43 +68,7 @@ public class PshStatistics extends SimpleShortStatistics {
 				state.output
 						.fatal("An IOException occurred while trying to create the log "
 								+ summaryFile + ":\n" + i);
-			}
-
-		/** special interpreter for internal use in statistics */
-		interpreter = new SemanticInterpreter();
-		interpreter.Initialize(new MersenneTwisterFast());
-		
-		File instructionListFile = state.parameters.getFile(base
-				.push(Interpreter.P_INSTRUCTIONLIST), interpreter.defaultBase()
-				.push(Interpreter.P_INSTRUCTIONLIST));
-		StringBuilder sb = new StringBuilder();
-
-		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					new FileInputStream(instructionListFile.getAbsolutePath())));
-			try {
-				String line;
-				while ((line = br.readLine()) != null) {
-					if (sb.length() > 0)
-						sb.append(" ").append(line);
-					else
-						sb.append("(").append(line);
-				}
-				sb.append(")");
-			} finally {
-				br.close();
-			}
-		} catch (IOException e) {
-			state.output.fatal("Can't read instruction list from file "
-					+ instructionListFile);
-		}
-		try {
-			Program instructionList = new Program(sb.toString());
-			interpreter.SetInstructions(instructionList);
-		} catch (Exception e) {
-			state.output.fatal("Can't set instruction list");
-		}
-		
+			}		
 	}
 	
 	@Override
@@ -293,6 +255,7 @@ public class PshStatistics extends SimpleShortStatistics {
 		PshIndividual ind = (PshIndividual) individual.clone();
 		FloatSymbolicRegression problem = ((FloatSymbolicRegression) (state.evaluator.p_problem
 				.clone()));
+		Interpreter interpreter = ((PshEvolutionState)state).interpreter[0];
 		problem.evaluateTestSet(state, 0, interpreter, ind);
 		return (KozaFitness) (ind.fitness);
 	}
