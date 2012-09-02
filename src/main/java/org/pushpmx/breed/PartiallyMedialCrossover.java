@@ -66,7 +66,6 @@ public class PartiallyMedialCrossover extends CrossoverPipeline {
 	/** Permutation of subprogram indices */
 	public Permutation permutation;	
 
-	
 	@Override
 	public Parameter defaultBase() {
 		return PshBreedDefaults.base().push(P_PMXOVER);
@@ -153,7 +152,7 @@ public class PartiallyMedialCrossover extends CrossoverPipeline {
 		Program p1 = parents[0].program;
 		Program p2 = parents[1].program;
 
-		// parents length (precisely, sizes of their root stacks)
+		// parents length (more precisely, sizes of their root stacks)
 		int p1Length = p1.size();
 		int p2Length = p2.size();
 
@@ -200,6 +199,10 @@ public class PartiallyMedialCrossover extends CrossoverPipeline {
 		
 		if (shuffleSubprograms) {
 			permutation.shuffle(state, thread, searchingSteps);
+			// update subprogram size information
+			for (int i = 0; i < subprogramSpace.size(); i++) {
+				sizeBuffer[i] = subprogramSpace.get(i).programsize(); 
+			}
 		}
 		
 		int p1Size = p1.programsize();
@@ -218,6 +221,14 @@ public class PartiallyMedialCrossover extends CrossoverPipeline {
 			// get the replacing program and its size (size, not length of a root stack)
 			int index = permutation.get(step);
 			replacement = subprogramSpace.get(index);
+
+			// omit replacing programs identical to parent subprograms
+			if (divergenceType == V_GEOMETRICITY && (replacement.equals(p1parts[1]) || breedSecondParent
+					&& replacement.equals(p2parts[1]))) {
+				++ step;
+				continue;
+			}
+
 			int replacementSize = sizeBuffer[index];
 
 			// determine the interpreter memory state to be used and check whether size of the offspring is correct
@@ -235,8 +246,10 @@ public class PartiallyMedialCrossover extends CrossoverPipeline {
 			}
 
 			// if size is too big, check the next replacing subprogram
-			if (!isSizeCorrect)
+			if (!isSizeCorrect) {
+				++ step;
 				continue;
+			}
 
 			// determine the semantics of the offspring with the given subprogram
 			ofSemantics = computeSemantics(whichMemoryState,
@@ -245,10 +258,7 @@ public class PartiallyMedialCrossover extends CrossoverPipeline {
 			// compute divergence
 			divergence = computeDivergence(p1Semantics, p2Semantics,
 					ofSemantics);
-			if (divergence < 0.0) {
-				// fix rounding errors
-				divergence = 0.0;
-			}
+			
 			// check if we found improvement
 			if (bestReplacement != null) {
 				if (divergence < bestDivergence) {
@@ -365,15 +375,22 @@ public class PartiallyMedialCrossover extends CrossoverPipeline {
 		if (Double.isInfinite(distance_p2_o)) {
 			return Double.POSITIVE_INFINITY;
 		}
+		double divergence = 0.0;
 		switch (divergenceType) {
 		case V_GEOMETRICITY:
 			// compute divergence from geometricity
-			return distance_p1_o + distance_p2_o - distance_p1_p2;
+			divergence = distance_p1_o + distance_p2_o - distance_p1_p2;
+			break;
 		default:
 		case V_EQUIDISTANCE:
 			// compute divergence from equidistance
-			return Math.abs(distance_p1_o - distance_p2_o);
+			divergence = Math.abs(distance_p1_o - distance_p2_o);
 		}
+		if (divergence < 0.0) {
+			// fixing rounding errors
+			divergence = 0.0;
+		}
+		return divergence;
 	}
 
 	/** temporary helper fields */
