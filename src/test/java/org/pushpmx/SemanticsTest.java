@@ -3,6 +3,7 @@ package org.pushpmx;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,10 +24,12 @@ import org.spiderland.Psh.intStack;
 public class SemanticsTest {
 
 	protected Semantics semantics;
+	protected Semantics semantics2;
 	
 	@Before
 	public void prepare() throws Exception {
 		semantics = new Semantics();
+		semantics2 = new Semantics();
 	}
 
 	@Test
@@ -255,6 +258,59 @@ public class SemanticsTest {
 		semantics.addBooleanStack(stack);
 		assertEquals(semantics.stackVector.size(), 3);
 		assertArrayEquals(semantics.stackVector.get(2), new float[0], 0.0f);
+		
+	}
+	
+	@Test
+	public void test_are_equal() {
+		
+
+		assertNotNull(semantics.stackVector);
+		semantics.stackVector.clear();
+		assertEquals(semantics.stackVector.size(), 0);
+		
+		assertNotNull(semantics2.stackVector);
+		semantics2.stackVector.clear();
+		assertEquals(semantics2.stackVector.size(), 0);
+
+		// sem1
+		floatStack stack = new floatStack();
+		stack.push(0.0f);
+		stack.push(1.0f);
+		stack.push(12.05f);
+		semantics.addFloatStack(stack);
+		
+		stack = new floatStack();
+		stack.push(3.0f);
+		stack.push(1.0f);
+		stack.push(12.05f);
+		semantics.addFloatStack(stack);
+		
+		// sem2
+		stack = new floatStack();
+		stack.push(0.0f);
+		stack.push(1.0f);
+		stack.push(12.05f);
+		semantics2.addFloatStack(stack);
+		
+		stack = new floatStack();
+		stack.push(3.0f);
+		stack.push(1.0f);
+		stack.push(12.05f);
+		semantics2.addFloatStack(stack);
+		
+		assertEquals(semantics.stackVector.size(), 2);
+		assertEquals(semantics2.stackVector.size(), 2);
+		
+		assertArrayEquals(semantics.stackVector.get(0), new float[]{0,1,12.05f}, 0.0f);
+		assertArrayEquals(semantics.stackVector.get(1), new float[]{3,1,12.05f}, 0.0f);
+
+		assertArrayEquals(semantics2.stackVector.get(0), new float[]{0,1,12.05f}, 0.0f);
+		assertArrayEquals(semantics2.stackVector.get(1), new float[]{3,1,12.05f}, 0.0f);
+		
+		
+		assertTrue("equality of semantics", semantics.equals(semantics2));
+		
 		
 	}
 	

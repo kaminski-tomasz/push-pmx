@@ -11,7 +11,7 @@ public abstract class SemanticsMetric implements Prototype {
 	public static final String P_EPSILON = "epsilon";
 	
 	/** Allowed absolute error for compared float values */ 
-	public double epsilon = 0.0;
+	public double epsilon;
 	
 	@Override
 	public SemanticsMetric clone() {
@@ -27,7 +27,7 @@ public abstract class SemanticsMetric implements Prototype {
 	public void setup(EvolutionState state, Parameter base) {
 		Parameter def  = defaultBase();
 		epsilon = state.parameters.getDoubleWithDefault(base.push(P_EPSILON),
-				def.push(P_EPSILON), 0.0);
+				def.push(P_EPSILON), 1.0e-6);
 	}
 
 	public double getDistance(Semantics sem1, Semantics sem2) {
@@ -41,7 +41,8 @@ public abstract class SemanticsMetric implements Prototype {
 			double stackDistance = getStackDistance(stack1, stack2);
 			if (Double.isInfinite(stackDistance))
 				return Double.POSITIVE_INFINITY;
-			distance += stackDistance;
+			if (stackDistance >= epsilon) 
+				distance += stackDistance;
 		}
 		if (size > 0)
 			distance /= (double) size;

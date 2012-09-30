@@ -37,7 +37,7 @@ public class PeekMetric extends SemanticsMetric {
 		} else if (V_EUCLIDEAN.equals(typeStr)) {
 			type = C_EUCLIDEAN;
 		} else if (typeStr != null) {
-			state.output.fatal("Unknown peek metric type: " + typeStr);
+			state.output.fatal("Unknown peak metric type: " + typeStr);
 		}
 	}
 

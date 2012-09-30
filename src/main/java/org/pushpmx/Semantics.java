@@ -16,6 +16,8 @@ import org.spiderland.Psh.intStack;
  */
 public class Semantics {
 
+	public static final float epsilon = 1.0e-6f;
+
 	public ArrayList<float[]> stackVector = new ArrayList<float[]>();
 
 	public Semantics() {
@@ -108,7 +110,7 @@ public class Semantics {
 		for (int i = 0; i < stackVector.size(); i++) {
 			sb.append("\t[");
 			for (int j = 0; j < stackVector.get(i).length; j++) {
-				if (j > 0) 
+				if (j > 0)
 					sb.append(",");
 				sb.append(stackVector.get(i)[j]);
 			}
@@ -117,4 +119,104 @@ public class Semantics {
 		sb.append("}");
 		return sb.toString();
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this)
+			return true;
+		if (!(obj instanceof Semantics))
+			return false;
+		Semantics sem = (Semantics) obj;
+		if (sem == null || sem.stackVector == null)
+			return false;
+		if (this.stackVector == sem.stackVector)
+			return true;
+		if (this.stackVector.size() != sem.stackVector.size())
+			return false;
+		for (int i = 0; i < stackVector.size(); i++) {
+			// check all stacks
+			float[] stack1 = this.stackVector.get(i);
+			float[] stack2 = sem.stackVector.get(i);
+			if (stack1.length != stack2.length)
+				return false;
+			for (int j = 0; j < stack1.length; j++) {
+				// check the relative error
+				if (stack1[j] != stack2[j]
+						&& Math.abs(stack1[j] - stack2[j]) >= epsilon)
+					return false;
+			}
+		}
+		return true;
+	}
+
+	public enum CompareType {
+		StackHeads, StackTails
+	};
+
+	public boolean equalParts(Object obj, CompareType compare) {
+		if (obj == this)
+			return true;
+		if (!(obj instanceof Semantics))
+			return false;
+		Semantics sem = (Semantics) obj;
+		if (sem == null || sem.stackVector == null)
+			return false;
+		if (this.stackVector == sem.stackVector)
+			return true;
+		if (this.stackVector.size() != sem.stackVector.size())
+			return false;
+
+		for (int i = 0; i < stackVector.size(); i++) {
+			// check all stacks
+			float[] stack1 = this.stackVector.get(i);
+			float[] stack2 = sem.stackVector.get(i);
+			int minLength = Math.min(stack1.length, stack2.length);
+
+			if (compare == CompareType.StackHeads) {
+				for (int j = 0; j < minLength; j++) {
+					if (stack1[j] != stack2[j]
+							&& Math.abs(stack1[j] - stack2[j]) >= epsilon)
+						return false;
+				}
+			} else {
+				for (int j = 0; j < minLength; j++) {
+					if (stack1[stack1.length-j-1] != stack2[stack2.length-j-1]
+							&& Math.abs(stack1[stack1.length-j-1] - 
+									stack2[stack2.length-j-1]) >= epsilon)
+						return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	public boolean equalPeeks(Object obj) {
+		if (obj == this)
+			return true;
+		if (!(obj instanceof Semantics))
+			return false;
+		Semantics sem = (Semantics) obj;
+		if (sem == null || sem.stackVector == null)
+			return false;
+		if (this.stackVector == sem.stackVector)
+			return true;
+		if (this.stackVector.size() != sem.stackVector.size())
+			return false;
+
+		for (int i = 0; i < stackVector.size(); i++) {
+			// check all peeks
+			float[] stack1 = this.stackVector.get(i);
+			float[] stack2 = sem.stackVector.get(i);
+			if (stack1.length == 0 && stack2.length == 0)
+				continue;
+			if (stack1.length == 0 || stack2.length == 0)
+				return false;
+			float peek1 = stack1[stack1.length - 1];
+			float peek2 = stack2[stack2.length - 1];
+			if (peek1 != peek2 && Math.abs(peek1 - peek2) >= epsilon)
+				return false;
+		}
+		return true;
+	}
+
 }
