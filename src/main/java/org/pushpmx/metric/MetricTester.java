@@ -1,3 +1,19 @@
+/*
+* Copyright 2012 Tomasz Kamiński
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
 package org.pushpmx.metric;
 
 import java.util.Arrays;
@@ -58,8 +74,8 @@ public class MetricTester {
 				new HammingMetric(),
 				null,
 				// new EuclideanMetric(),
-				new PeekMetric(), 
-				new PeekMetric(),
+				new TopMetric(), 
+				new TopMetric(),
 				new DiscordanceMetric() };
 
 		// hamming
@@ -69,12 +85,12 @@ public class MetricTester {
 		// ((EuclideanMetric) metrics[1]).epsilon = Semantics.epsilon;
 
 		// peek
-		((PeekMetric) metrics[2]).epsilon = Semantics.epsilon;
-		((PeekMetric) metrics[2]).type = PeekMetric.C_HAMMING;
+		((TopMetric) metrics[2]).epsilon = Semantics.epsilon;
+		((TopMetric) metrics[2]).type = TopMetric.C_HAMMING;
 
 		// peak 2
-		((PeekMetric) metrics[3]).epsilon = Semantics.epsilon;
-		((PeekMetric) metrics[3]).type = PeekMetric.C_EUCLIDEAN;
+		((TopMetric) metrics[3]).epsilon = Semantics.epsilon;
+		((TopMetric) metrics[3]).type = TopMetric.C_CITYBLOCK;
 		
 		// discordance
 		((DiscordanceMetric) metrics[4]).epsilon = Semantics.epsilon;
@@ -122,7 +138,7 @@ public class MetricTester {
 				else if (metric instanceof DiscordanceMetric)
 					ident_1_2 = semantics[ind1].equalParts(semantics[ind2],
 							CompareType.StackTails);
-				else if (metric instanceof PeekMetric)
+				else if (metric instanceof TopMetric)
 					ident_1_2 = semantics[ind1].equalPeeks(semantics[ind2]);
 				else {
 					System.out.println("metryka nieznana");
@@ -199,34 +215,36 @@ public class MetricTester {
 		Individual[] inds = state.population.subpops[0].individuals;
 
 		SemanticsMetric[] metrics = new SemanticsMetric[] {
-				new HammingMetric(), new PeekMetric(), new PeekMetric(),
-				new DiscordanceMetric(), new EuclideanMetric(), new EuclideanMetric() };
+				new HammingMetric(), 
+				new TopMetric(),				
+				new DiscordanceMetric(),
+				
+				new CityBlockMetric(),
+				new TopMetric(), 
+				new CityBlockMetric() };
 
 		// hamming
 		((HammingMetric) metrics[0]).epsilon = Semantics.epsilon;
 
-		// // euclidean
-		// ((EuclideanMetric) metrics[1]).epsilon = Semantics.epsilon;
-
-		// peek1
-		((PeekMetric) metrics[1]).epsilon = Semantics.epsilon;
-		((PeekMetric) metrics[1]).type = PeekMetric.C_HAMMING;
-
-		// peek2
-		((PeekMetric) metrics[2]).epsilon = 0;
-		((PeekMetric) metrics[2]).type = PeekMetric.C_EUCLIDEAN;
+		// hamming top
+		((TopMetric) metrics[1]).epsilon = Semantics.epsilon;
+		((TopMetric) metrics[1]).type = TopMetric.C_HAMMING;
 		
 		// discordance
-		((DiscordanceMetric) metrics[3]).epsilon = Semantics.epsilon;
-		((DiscordanceMetric) metrics[3]).compareTails = true;
+		((DiscordanceMetric) metrics[2]).epsilon = Semantics.epsilon;
+		((DiscordanceMetric) metrics[2]).compareTails = true;
 		
-		// euklides
-		((EuclideanMetric) metrics[4]).epsilon = Semantics.epsilon;
-		((EuclideanMetric) metrics[4]).partial = false;
+		// city-block
+		((CityBlockMetric) metrics[3]).epsilon = Semantics.epsilon;
 		
-		// euklides2
-		((EuclideanMetric) metrics[5]).epsilon = Semantics.epsilon;
-		((EuclideanMetric) metrics[5]).partial = true;
+		// city-block top
+		((TopMetric) metrics[4]).epsilon = Semantics.epsilon;
+		((TopMetric) metrics[4]).type = TopMetric.C_CITYBLOCK;
+		
+		// city-block partial
+		((CityBlockMetric) metrics[5]).epsilon = Semantics.epsilon;
+		((CityBlockMetric) metrics[5]).partial = true;
+		
 		
 		// get the problem
 		FloatSymbolicRegression problem = (FloatSymbolicRegression) state.evaluator.p_problem
@@ -246,7 +264,7 @@ public class MetricTester {
 			semantics[i] = new Semantics(memoryState);
 		}
 
-		for (int i = 0; i < 5000; i++) {
+		for (int i = 0; i < inds.length; i++) {
 			int ind1 = state.random[0].nextInt(inds.length);
 			int ind2 = state.random[0].nextInt(inds.length);
 			double fitnessDifference = Math

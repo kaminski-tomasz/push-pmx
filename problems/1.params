@@ -1,0 +1,145 @@
+
+####### EvolutionState settings
+
+evalthreads			= 4
+breedthreads 		= 4
+seed.0 				= time
+seed.1 				= time 
+seed.2 				= time 
+seed.3 				= time
+
+jobs				= 30
+
+checkpoint 			= false
+checkpoint-modulo	= 1
+prefix				= psh
+
+breed					= ec.simple.SimpleBreeder
+init					= ec.simple.SimpleInitializer
+finish					= ec.simple.SimpleFinisher
+exch					= ec.simple.SimpleExchanger
+
+state					= org.ecj.psh.PshEvolutionState
+eval					= org.ecj.psh.PshEvaluator
+eval.ideal-threshold	= 1.0E-6
+
+generations				= 250
+quit-on-run-complete	= false
+
+
+####### Population settings
+
+pop								= ec.Population
+pop.subpops						= 1
+pop.subpop.0					= ec.Subpopulation
+pop.subpop.0.size				= 10000
+pop.subpop.0.duplicate-retries	= 0
+
+pop.subpop.0.species			= org.ecj.psh.PshSpecies
+pop.subpop.0.species.ind		= org.ecj.psh.PshIndividual
+
+# in GP we usually use Koza fitness
+pop.subpop.0.species.fitness	= ec.gp.koza.KozaFitness
+
+
+###### Statistics
+
+stat				= org.pushpmx.PshStatistics
+stat.file			= run.stat
+stat.gather-full	= true
+stat.summary-file	= summary.stat
+
+
+############ Default Interpreter settings
+
+psh.interpreter							= org.spiderland.Psh.SemanticInterpreter
+
+psh.interpreter.generate-flat			= true
+
+psh.interpreter.max-random-code-size	= 30
+psh.interpreter.execution-limit			= 100
+psh.interpreter.max-points-in-program	= 100
+
+psh.interpreter.push-frame-mode			= false
+
+psh.interpreter.max-random-float		= 10.0
+psh.interpreter.min-random-float		= -10.0
+psh.interpreter.random-float-res		= 0.01
+
+psh.interpreter.instruction-list		= 1.instr.txt
+
+####### Defalt problem settings 
+
+eval.problem 							= org.pushpmx.problem.QuarticProblem
+
+eval.problem.train-min-range			= -1.0
+eval.problem.train-max-range			= 1.0
+eval.problem.train-points				= 20
+
+eval.problem.test-min-range				= -1.0
+eval.problem.test-max-range				= 1.0
+eval.problem.test-points				= 20
+
+eval.problem.repeat-float-stack 		= 100
+eval.problem.make-inputs 				= true
+eval.problem.hit-threshold				= 0.01
+eval.problem.test-points-resolution		= 0.0
+
+eval.problem.penalize					= false
+eval.problem.include-hits	 			= false
+eval.problem.hits-factor				= 10.0
+
+
+# 1PX
+psh.breed.one-point-xover.source.0			= ec.select.TournamentSelection
+psh.breed.one-point-xover.source.1			= same
+psh.breed.one-point-xover.toss				= true
+psh.breed.one-point-xover.homologous		= false
+psh.breed.one-point-xover.tries				= 100
+
+pop.subpop.0.species.pipe.source.0.source.0			= org.ecj.psh.breed.OnePointCrossover
+
+
+
+####### Specifying default breeding pipelines parameters
+ 
+# Tournament selection settings
+select.tournament.size					= 7
+
+# Reproduction pipeline settings
+breed.reproduce.source.0 				= ec.select.TournamentSelection
+
+# Mutation pipeline settings
+psh.breed.psh-mutate.source.0				= ec.select.TournamentSelection
+psh.breed.psh-mutate.use-fair				= true
+psh.breed.psh-mutate.fair-mutation-range	= 0.50
+
+# Simplification pipeline settings
+psh.breed.psh-simplify.source.0				= ec.select.TournamentSelection
+psh.breed.psh-simplify.steps				= 20
+psh.breed.psh-simplify.flatten-prob			= 0.20
+
+# Metric settings
+psh.discordance-metric.compare-tails		= true
+psh.discordance-metric.epsilon				= 0
+
+psh.top-metric.type						= hamming
+psh.top-metric.epsilon						= 0
+
+# breeding pipelines
+pop.subpop.0.species.pipe				= org.pushpmx.breed.FlatteningOperator
+pop.subpop.0.species.pipe.likelihood 	= 1.0
+
+pop.subpop.0.species.pipe.source.0					= ec.breed.MultiBreedingPipeline
+pop.subpop.0.species.pipe.source.0.num-sources 		= 2
+pop.subpop.0.species.pipe.source.0.generate-max		= true
+
+# Following line should be specified in operator's parameter file
+pop.subpop.0.species.pipe.source.0.source.0			= org.ecj.psh.breed.OnePointCrossover
+pop.subpop.0.species.pipe.source.0.source.0.prob	= 0.95
+
+pop.subpop.0.species.pipe.source.0.source.1			= org.ecj.psh.breed.PshMutation
+pop.subpop.0.species.pipe.source.0.source.1.prob	= 0.05
+
+#print-unaccessed-params	= true
+

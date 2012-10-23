@@ -21,9 +21,9 @@ import org.ecj.psh.PshDefaults;
 import ec.EvolutionState;
 import ec.util.Parameter;
 
-public class EuclideanMetric extends SemanticsMetric {
+public class CityBlockMetric extends SemanticsMetric {
 
-	public static final String P_METRIC = "euclidean-metric";
+	public static final String P_METRIC = "city-block-metric";
 	public static final String P_PARTIAL = "partial";
 
 	public boolean partial;
@@ -54,11 +54,10 @@ public class EuclideanMetric extends SemanticsMetric {
 			double distance = 0.0;
 			int length = stack1.length;
 			for (int i = 0; i < length; i++) {
-				double squareDiff = stack1[i] - stack2[i];
-				squareDiff = squareDiff * squareDiff;
-				distance += squareDiff;
+				double absDiff = Math.abs(stack1[i] - stack2[i]);
+				distance += absDiff;
 			}
-			return Math.sqrt(distance);
+			return distance;
 		} else {
 			if (stack1.length == 0 || stack2.length == 0) {
 				return Double.POSITIVE_INFINITY;
@@ -66,12 +65,11 @@ public class EuclideanMetric extends SemanticsMetric {
 			double distance = 0.0;
 			int minLength = Math.min(stack1.length, stack2.length);
 			for (int i = 0; i < minLength; i++) {
-				double squareDiff = stack1[stack1.length - 1 - i]
-						- stack2[stack2.length - 1 - i];
-				squareDiff = squareDiff * squareDiff;
-				distance += squareDiff;
+				double absDiff = Math.abs(stack1[stack1.length - 1 - i]
+						- stack2[stack2.length - 1 - i]);
+				distance += absDiff;
 			}
-			return Math.sqrt(distance);
+			return distance;
 		}
 	}
 
